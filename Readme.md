@@ -41,8 +41,6 @@ NOTE2: Minimum noise is 1e-6 which is practically none
 
 * Correct usage of bounds
 * Code and add many acquisition functions
-    * New acquisition functions
-    * Implement more pretext task for new actiosition functions
 * Implement cmd parameters
 * Code efficient benchmark functions and separate them from ain
 * Implement constrains

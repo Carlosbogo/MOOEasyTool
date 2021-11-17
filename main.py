@@ -8,7 +8,7 @@ import gpflow
 from gpflow.utilities import print_summary, set_trainable, to_default_float
 import numpy as np
 import sobol_seq
-from utils import plotGPR
+from utils import plotACQ, plotGPR
 from models.GaussianProcess import GaussianProcess
 from acquisition_functions.MESMO import mesmo_acq
 
@@ -90,17 +90,18 @@ for l in range(total_iter):
     ## GRID SEARCH OVER THE INPUT SPACE FOR THE OPTIMUM
     ## OF THE ACQUISITION FUNCTION
     x_tries = np.random.uniform(lowerBound, upperBound,size=(1000, d))
-    y_tries = mesmo_acq(x_tries, GP)
+    acqs = mesmo_acq(x_tries, GP)
 
-    sorted_index = np.argsort(y_tries)
+    sorted_index = np.argsort(acqs)
 
     x_best = x_tries[sorted_index[0]]
-    y_best = y_tries[sorted_index[0]]
+
     for index in sorted_index:
         x_best = x_tries[index]
-        y_best = y_tries[index]
         if not x_best in GP.X:
             break
+
+    plotACQ(GP,x_tries,acqs,x_best, acqs[sorted_index[0]])
 
     ## EVALUATION OF THE OUTSIDE FUNCTION
     y_best = evaluation(x_best,d)
@@ -108,5 +109,4 @@ for l in range(total_iter):
     GP.addSample(x_best,y_best)     ## Add new sample to the model
     GP.updateGPR()                  ## Update data on the GP regressor
     GP.optimizeKernel()             ## Optimize kernel hyperparameters
-
-    plotGPR(GP)
+    # plotGPR(GP)

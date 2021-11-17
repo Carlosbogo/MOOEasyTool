@@ -40,7 +40,7 @@ def mesmo_acq(x_tries,GP: GaussianProcess):
         acq = 0
         for i in range(GP.O):
             varphi = (maximums[i]-m[i]) / sqrt(v[i])
-            pdf, cdf = norm.pdf(varphi), min(norm.cdf(varphi),1e-30)
+            pdf, cdf = norm.pdf(varphi), max(norm.cdf(varphi),1e-30)
             acq+= varphi*pdf / (2*cdf) - np.log(cdf)
         
         acqs.append(acq)
