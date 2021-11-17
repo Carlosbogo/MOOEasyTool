@@ -4,10 +4,11 @@
 Date: 16-Nov 2021
 """
 from math import sqrt
-import gpflow
-from gpflow.utilities import print_summary, set_trainable, to_default_float
 import numpy as np
 import sobol_seq
+import gpflow
+from gpflow.utilities import print_summary, set_trainable, to_default_float
+
 from utils import plotACQ, plotGPR
 from models.GaussianProcess import GaussianProcess
 from acquisition_functions.MESMO import mesmo_acq

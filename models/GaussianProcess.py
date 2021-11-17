@@ -4,8 +4,8 @@
 Date: Nov 2021
 """
 
-import gpflow
 import numpy as np
+import gpflow
 
 class GaussianProcess(object):
     def __init__(self, O:int, C:int, d:int, lowerBound: float, upperBound: float, kernel, X = None, Y = None, noise_variance=0.01):
