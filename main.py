@@ -3,15 +3,18 @@
 
 Date: 16-Nov 2021
 """
+
 from math import sqrt
 import numpy as np
 import sobol_seq
 import gpflow
 from gpflow.utilities import print_summary, set_trainable, to_default_float
 
-from utils import plotACQ, plotGPR
+from utils import blockPrint, enablePrint
 from models.GaussianProcess import GaussianProcess
 from acquisition_functions.MESMO import mesmo_acq
+from arguments.arguments import MainArguments
+
 
 ### Definitions of outside parameters
 def XSquared(x,d):
@@ -49,18 +52,24 @@ def evaluation(x,d):
 
 O = len(functions)
 C = len(constraints)
-d = 1
 
 
 ### Definition of inside parameters
-seed = 10
+args = MainArguments().parse()
+
+if args.quiet:
+    blockPrint()
+
+d = args.d
+    
+seed = args.seed
 np.random.seed(seed)
 
-total_iter = 5
-initial_number = 2
+total_iter = args.total_iter
+initial_iter = args.initial_iter
 
-lowerBound = -1
-upperBound = 1
+lowerBound = args.lower_bound
+upperBound = args.upper_bound
 
 
 grid = sobol_seq.i4_sobol_generate(d,1000,np.random.randint(0,1000))
@@ -73,7 +82,7 @@ GP = GaussianProcess(O, C, d, lowerBound, upperBound, k, noise_variance=2e-6)
 
 
 ### Initial samples, at least 1
-for l in range(initial_number):
+for l in range(initial_iter):
     while True:
         index = np.random.choice(bound_grid.shape[0], 1)[0]  
         x_rand = bound_grid[index]
@@ -84,13 +93,13 @@ for l in range(initial_number):
 
 GP.updateGPR()
 GP.optimizeKernel()
-plotGPR(GP)
+GP.plot()
 
 for l in range(total_iter):
     
     ## GRID SEARCH OVER THE INPUT SPACE FOR THE OPTIMUM
     ## OF THE ACQUISITION FUNCTION
-    x_tries = np.random.uniform(lowerBound, upperBound,size=(1000, d))
+    x_tries = bound_grid
     acqs = mesmo_acq(x_tries, GP)
 
     sorted_index = np.argsort(acqs)
@@ -102,7 +111,7 @@ for l in range(total_iter):
         if not x_best in GP.X:
             break
 
-    plotACQ(GP,x_tries,acqs,x_best, acqs[sorted_index[0]])
+    GP.plotACQ(x_tries,acqs,x_best, acqs[sorted_index[0]])
 
     ## EVALUATION OF THE OUTSIDE FUNCTION
     y_best = evaluation(x_best,d)

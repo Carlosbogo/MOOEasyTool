@@ -11,7 +11,7 @@ from models.GaussianProcess import GaussianProcess
 
 class GPProblem(Problem):
     def __init__(self, GP: GaussianProcess):
-        super().__init__(n_var=GP.d, n_obj=GP.O, n_constr=GP.C, xl=np.array([GP.lowerBound]), xu=np.array([GP.upperBound]))
+        super().__init__(n_var=GP.d, n_obj=GP.O, n_constr=GP.C, xl=np.array([GP.lowerBound]*GP.d), xu=np.array([GP.upperBound]*GP.d))
         self.GPR = GP.GPR
 
     def _evaluate(self, x, out, *args, **kwargs):

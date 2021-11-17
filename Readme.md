@@ -6,11 +6,11 @@ An user friendly MOO tool
 
 1. Initialize GP model: 
 
-| Attre          | Default-Value             | Description                |
+| Attr           | Default-Value             | Description                |
 |----------------|---------------------------|----------------------------|
 | O              | non-default               | # of objective to optimize |
 | C              | non-default               | # of constrains (TBD)      |
-| d              | non-default               | input dimension            |
+| d              | non-default               | input space dimensions     |
 | kernel         | non-default               | kernel of the GP           |
 | X              | Empty 2D np array         | input data of the GP       |
 | Y              | Empty 2D np array         | output data of the GP      |
@@ -39,11 +39,25 @@ NOTE2: Minimum noise is 1e-6 which is practically none
 
 ## TODO: Next task to complete
 
-* Correct usage of bounds
-* Code and add many acquisition functions
+### Released:
+
+### Testing:
+
+### Working:
+
 * Implement cmd parameters
-* Code efficient benchmark functions and separate them from ain
+* Study to fix 3.4 and 3.5 at the start of step 3
+
+### Planning:
+
+* Code efficient benchmark functions and separate them from main
+* Write output files of the experiments
+* ISSUE: GaussianProcess.plotSamples functions for >1 input dimension
+### Backlog:
+
+* Improve usage of bounds (each input variable its own bound) 
+    * NOTE: Transform input variables instead of bounds?
+* Code and add many acquisition functions
 * Implement constrains
 * More efficient search of acquisition function optimum?
 * Several samples for each iteration?
-* Study to fix 3.4 and 3.5 at the start of step 3
