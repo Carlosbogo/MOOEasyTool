@@ -41,6 +41,8 @@ NOTE2: Minimum noise is 1e-6 which is practically none
 
 ### Released:
 
+* ISSUE: GaussianProcess.plotSamples functions for >1 input dimension
+
 ### Testing:
 
 ### Working:
@@ -52,7 +54,6 @@ NOTE2: Minimum noise is 1e-6 which is practically none
 
 * Code efficient benchmark functions and separate them from main
 * Write output files of the experiments
-* ISSUE: GaussianProcess.plotSamples functions for >1 input dimension
 ### Backlog:
 
 * Improve usage of bounds (each input variable its own bound) 

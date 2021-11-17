@@ -43,7 +43,14 @@ def f2(x,d):
         res-=7/12
     return res
 
-functions=[f1,f2]
+def f3(x,d):
+    res = 0
+    for i in range(d):
+        res+=x[i]*x[i]
+        res-=2/6
+    return res
+
+functions=[f1,f2,f3]
 constraints=[] 
 def evaluation(x,d):
     y = [f(x,d) for f in functions]
@@ -93,7 +100,7 @@ for l in range(initial_iter):
 
 GP.updateGPR()
 GP.optimizeKernel()
-GP.plot()
+GP.plotSamples()
 
 for l in range(total_iter):
     
