@@ -5,6 +5,7 @@ Date: 16-Nov 2021
 """
 
 from math import sqrt
+import os
 import numpy as np
 import sobol_seq
 import gpflow
@@ -60,12 +61,16 @@ def evaluation(x,d):
 O = len(functions)
 C = len(constraints)
 
-
 ### Definition of inside parameters
-args = MainArguments().parse()
+Aguments = MainArguments()
+args = Aguments.parse()
 
 if args.quiet:
     blockPrint()
+
+outputFile = os.path.join(args.dir_path, args.output_file+'.csv')
+if args.save:
+    Aguments.writeArguments(outputFile)
 
 d = args.d
     
@@ -87,6 +92,8 @@ k = gpflow.kernels.SquaredExponential()
 ### GPs Initialization
 GP = GaussianProcess(O, C, d, lowerBound, upperBound, k, noise_variance=2e-6)
 
+if args.save:
+    GP.writeGPHeader(outputFile)
 
 ### Initial samples, at least 1
 for l in range(initial_iter):
@@ -96,11 +103,12 @@ for l in range(initial_iter):
         if GP.X is None or not x_rand in GP.X:
             break
     y_rand = evaluation(x_rand,d)
-    GP.addSample(x_rand,y_rand)
+    GP.addSample(x_rand,y_rand, args.save, outputFile)
 
 GP.updateGPR()
 GP.optimizeKernel()
-GP.plotSamples()
+if args.showplots:
+    GP.plotSamples()
 
 for l in range(total_iter):
     
@@ -117,13 +125,13 @@ for l in range(total_iter):
         x_best = x_tries[index]
         if not x_best in GP.X:
             break
-
-    GP.plotACQ(x_tries,acqs,x_best, acqs[sorted_index[0]])
+    
+    if args.showplots:        
+        GP.plotACQ(x_tries,acqs,x_best, acqs[sorted_index[0]])
 
     ## EVALUATION OF THE OUTSIDE FUNCTION
     y_best = evaluation(x_best,d)
     
-    GP.addSample(x_best,y_best)     ## Add new sample to the model
+    GP.addSample(x_best,y_best, args.save, outputFile)     ## Add new sample to the model
     GP.updateGPR()                  ## Update data on the GP regressor
     GP.optimizeKernel()             ## Optimize kernel hyperparameters
-    # plotGPR(GP)

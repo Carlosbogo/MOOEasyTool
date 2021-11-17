@@ -1,3 +1,9 @@
+"""
+@author: Miguel Taibo Martínez
+
+Date: 16-Nov 2021
+"""
+
 import argparse
 import os
 import __main__ as main
@@ -32,22 +38,40 @@ class BaseArguments():
         """Assert ranges of params, mistypes..."""
         raise NotImplementedError
 
+    def writeArguments(self, filename):
+        header  =  ''
+        header += ('-' * 10 + ' Arguments ' + '-' * 10 +"\n")
+        header += ('>>> Script: %s' % (os.path.basename(main.__file__))+"\n")
+        print_args = vars(self.args)
+        for key, val in sorted(print_args.items()):
+            header += ('%s: %s' % (str(key), str(val))+"\n")
+        header += ('-' * 30+"\n")
+        file = open(filename,"a+")
+        file.write(header)
+        file.close()
+
+        return True
 class OutpuArguments(BaseArguments):
     def initialize(self):
         BaseArguments.initialize(self)
         self.parser.add_argument(
             "--dir-path",
             type=str,
-            default=".",
+            default="experiments",
             help="Directory to write output")
         self.parser.add_argument(
             "--output-file",
             type=str,
             default="prueba",
             help="File to write output")
+        self.parser.add_argument(
+            "--save",
+            action='store_true',
+            help='Save resulst in file')
     def _correct(self):
         assert isinstance(self.args.dir_path, str)
         assert isinstance(self.args.output_file, str)
+        assert isinstance(self.args.save, bool)
 
 class MainArguments(OutpuArguments):
     def initialize(self):
@@ -93,10 +117,15 @@ class MainArguments(OutpuArguments):
             type=int,
             default=1,
             help="Upper bound for x value")
+        self.parser.add_argument(
+            "--showplots",
+            action='store_true',
+            help='Save resulst in file')
     def _correct(self):
         ## Output arguments
         assert isinstance(self.args.dir_path, str)
         assert isinstance(self.args.output_file, str)
+        assert isinstance(self.args.save, bool)
 
         ## Main arguments
         assert isinstance(self.args.d, int)
@@ -105,4 +134,5 @@ class MainArguments(OutpuArguments):
         assert isinstance(self.args.total_iter, int)
         assert isinstance(self.args.lower_bound, int)
         assert isinstance(self.args.upper_bound, int)
+        assert isinstance(self.args.showplots, bool)
         

@@ -42,8 +42,7 @@ NOTE2: Minimum noise is 1e-6 which is practically none
 ### Released:
 
 * ISSUE: GaussianProcess.plotSamples functions for >1 input dimension
-
-### Testing:
+* Write output files of the experiments
 
 ### Working:
 
@@ -53,12 +52,12 @@ NOTE2: Minimum noise is 1e-6 which is practically none
 ### Planning:
 
 * Code efficient benchmark functions and separate them from main
-* Write output files of the experiments
+
 ### Backlog:
 
+* More efficient search of acquisition function optimum?
+* Several samples for each iteration?
+* Implement constrains
 * Improve usage of bounds (each input variable its own bound) 
     * NOTE: Transform input variables instead of bounds?
 * Code and add many acquisition functions
-* Implement constrains
-* More efficient search of acquisition function optimum?
-* Several samples for each iteration?

@@ -23,13 +23,15 @@ class GaussianProcess(object):
         self.opt = gpflow.optimizers.Scipy()
         self.GPR = None
 
-    def addSample(self, x, y):
+    def addSample(self, x, y, save=False, filename=None):
         if self.X is None or self.Y is None:
             self.X = np.array([x])
             self.Y = np.array([y])
             return
         self.X = np.append(self.X, [x], axis=0)
         self.Y = np.append(self.Y, [y], axis=0)
+        if save and filename is not None:
+            self.writeSample(filename, x,y)
 
     def updateGPR(self):
         self.GPR = gpflow.models.GPR(
@@ -41,6 +43,30 @@ class GaussianProcess(object):
         self.opt.minimize(
             self.GPR.training_loss, 
             variables=self.GPR.trainable_variables)
+
+    ## Saving into file methods
+    def writeGPHeader(self,filename):
+        vars  = ['x'+str(i) for i in range(self.d)]
+        vars += ['y'+str(i) for i in range(self.O)]
+        vars += ['c'+str(i) for i in range(self.C)]
+        header = ''
+        for v in vars:
+            header += (v + ",") 
+            
+        file = open(filename,"a+")
+        file.write(header[0:-1]+'\n')
+        file.close()
+
+    def writeSample(self, filename, x, y):
+        vars  = [str(e) for e in x]
+        vars += [str(e) for e in y]
+        row   = ''
+        for v in vars:
+            row += (v+',')
+
+        file = open(filename,"a+")
+        file.write(row[0:-1]+'\n')
+        file.close()
 
     ## Visualization methods
     def plot(self):
