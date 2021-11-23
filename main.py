@@ -16,7 +16,7 @@ from arguments.arguments import MainArguments
 ### Definitions of outside parameters
 from benchmark import f1,f2,f3
 
-functions=[f1, f2, f3]
+functions=[f1, f2]
 constraints=[] 
 def evaluation(x,d):
     y = [f(x,d) for f in functions]
@@ -48,9 +48,6 @@ initial_iter = args.initial_iter
 lowerBound = args.lower_bound
 upperBound = args.upper_bound
 
-# grid = sobol_seq.i4_sobol_generate(d,1000,np.random.randint(0,1000))
-# bound_grid = np.vectorize(lambda x : x*(upperBound-lowerBound)+lowerBound)(grid)
-
 ### Kernerl configuration 
 k = gpflow.kernels.SquaredExponential()
 ### GPs Initialization
@@ -58,6 +55,10 @@ GP = GaussianProcess(O, C, d, lowerBound, upperBound, k, noise_variance=2e-6)
 
 if args.save:
     GP.writeGPHeader(outputFile)
+
+# x_rand = np.zeros(d)
+# y_rand = evaluation(x_rand,d)
+# GP.addSample(x_rand,y_rand, args.save, outputFile)
 
 ### Initial samples, at least 1
 for l in range(initial_iter):
@@ -87,3 +88,20 @@ for l in range(total_iter):
     GP.updateGPR()                                          ## Update data on the GP regressor
     GP.optimizeKernel()                                     ## Optimize kernel hyperparameters
 
+
+from models.GPProblem import GPProblem
+from pymoo.algorithms.moo.nsga2 import NSGA2
+from pymoo.factory import get_termination
+from pymoo.optimize import minimize
+
+problem = GPProblem(GP)
+algorithm = NSGA2()
+termination = get_termination("n_gen", 40)
+res = minimize(problem,
+                algorithm,
+                termination)
+import matplotlib.pyplot as plt
+plt.plot(res.X[:,0], res.X[:,1], 'o')
+plt.show()
+import pdb
+pdb.set_trace()

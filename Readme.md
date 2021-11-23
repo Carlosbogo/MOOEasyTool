@@ -41,6 +41,7 @@ NOTE2: Minimum noise is 1e-6 which is practically none
 
 ### Released:
 
+* More efficient search of acquisition function optimum?
 * ISSUE: GaussianProcess.plotSamples functions for >1 input dimension
 * Write output files of the experiments
 
@@ -49,6 +50,7 @@ NOTE2: Minimum noise is 1e-6 which is practically none
 * Implement cmd parameters
 * Study to fix 3.4 and 3.5 at the start of step 3
 * Final result, pareto front and pareto set
+* Implement constrains
 
 ### Planning:
 
@@ -56,9 +58,7 @@ NOTE2: Minimum noise is 1e-6 which is practically none
 
 ### Backlog:
 
-* More efficient search of acquisition function optimum?
 * Several samples for each iteration?
-* Implement constrains
 * Improve usage of bounds (each input variable its own bound) 
     * NOTE: Transform input variables instead of bounds?
 * Code and add many acquisition functions

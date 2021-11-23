@@ -136,7 +136,7 @@ class GaussianProcess(object):
         plt.show()
 
     def plotMESMO(self, x_best, acq, x_tries, acqs):
-        fig, axs = plt.subplots(nrows = self.O+1, ncols=self.d)
+        fig, axs = plt.subplots(nrows = self.O+self.C+1, ncols=self.d)
         xx = np.linspace(self.lowerBound, self.upperBound, 100).reshape(100, 1)
 
         if self.d >1:
@@ -158,10 +158,25 @@ class GaussianProcess(object):
                         axs[i, j].set_xlabel("x"+str(j))
                     if j==0:
                         axs[i, j].set_ylabel("y"+str(i))
-                    # axs[i, j].axvline(x=x_best[j], color='r')
-                axs[self.O, j].plot(x_tries[:,j],acqs,'o', markersize=1)
-                axs[self.O, j].plot([x_best[j]], [acq],'or', markersize=4)
-                axs[self.O, j].set_ylim(acq-0.2, acq+2.2)
+                    axs[i, j].axvline(x=x_best[j], color='r')
+                
+                for i in range(self.O, self.O+self.C):
+                    axs[i, j].plot(self.X[:,j], self.Y[:,i], 'kx', mew=2)
+                    axs[i, j].plot(grid[:,j], mean[:,i], 'C0', lw=2)
+                    axs[i, j].fill_between(grid[:,j],
+                                    mean[:,i] - 2*np.sqrt(var[:,i]),
+                                    mean[:,i] + 2*np.sqrt(var[:,i]),
+                                    color='C0', alpha=0.2)
+                        
+                    if i==0:
+                        axs[i, j].xaxis.set_label_position('top')
+                        axs[i, j].set_xlabel("x"+str(j))
+                    if j==0:
+                        axs[i, j].set_ylabel("c"+str(i))
+                    axs[i, j].axvline(x=x_best[j], color='r')
+                axs[self.O+self.C, j].plot(x_tries[:,j],acqs,'o', markersize=1)
+                axs[self.O+self.C, j].plot([x_best[j]], [acq],'or', markersize=4)
+                axs[self.O+self.C, j].set_ylim(acq-0.2, acq+2.2)
 
         else:
             mean, var = self.GPR.predict_y(xx)
