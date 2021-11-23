@@ -135,8 +135,8 @@ class GaussianProcess(object):
                 axs[i].plot(xx[:,0], samples[:, :, i].numpy().T, "C0", linewidth=0.5)
         plt.show()
 
-    def plotACQ(self, x_best, acq):
-        fig, axs = plt.subplots(nrows = self.O, ncols=self.d)
+    def plotMESMO(self, x_best, acq, x_tries, acqs):
+        fig, axs = plt.subplots(nrows = self.O+1, ncols=self.d)
         xx = np.linspace(self.lowerBound, self.upperBound, 100).reshape(100, 1)
 
         if self.d >1:
@@ -158,7 +158,10 @@ class GaussianProcess(object):
                         axs[i, j].set_xlabel("x"+str(j))
                     if j==0:
                         axs[i, j].set_ylabel("y"+str(i))
-                    axs[i, j].axvline(x=x_best[j], color='r', label='x'+str(j)+'_best')
+                    # axs[i, j].axvline(x=x_best[j], color='r')
+                axs[self.O, j].plot(x_tries[:,j],acqs,'o', markersize=1)
+                axs[self.O, j].plot([x_best[j]], [acq],'or', markersize=4)
+                axs[self.O, j].set_ylim(acq-0.2, acq+2.2)
 
         else:
             mean, var = self.GPR.predict_y(xx)
@@ -169,6 +172,15 @@ class GaussianProcess(object):
                                 mean[:,i] - 2*np.sqrt(var[:,i]),
                                 mean[:,i] + 2*np.sqrt(var[:,i]),
                                 color='C0', alpha=0.2)
+            
+                if i==0:
+                    axs[i].xaxis.set_label_position('top')
+                    axs[i].set_xlabel("x0")
+                axs[i].set_ylabel("y"+str(i))
+            
+            axs[self.O].plot(x_tries[:,0],acqs,'o', markersize=1)
+            axs[self.O].plot([x_best[0]], [acq],'or', markersize=4)
+            axs[self.O].set_ylim(acq-0.2, acq+2.2)
                     
         plt.show()    
 

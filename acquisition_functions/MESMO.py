@@ -15,7 +15,7 @@ from models.GPProblem import GPProblem
 from models.MESMOProblem import MESMOProblem
 from models.GaussianProcess import GaussianProcess
 
-def mesmo_acq(GP: GaussianProcess):
+def mesmo_acq(GP: GaussianProcess, showplots: bool):
 
     ## Compute pareto front
     problem = GPProblem(GP)
@@ -32,6 +32,10 @@ def mesmo_acq(GP: GaussianProcess):
     algorithm = NSGA2()
     termination = get_termination("n_gen", 40)
     res = minimize(problem, algorithm, termination)
+
+    if showplots:        
+        x_tries, acqs = problem.curve() 
+        GP.plotMESMO(res.X[0], res.F[0], x_tries, acqs)
 
     return res.X[0], res.F[0]
 

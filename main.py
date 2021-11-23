@@ -63,7 +63,7 @@ if args.save:
 for l in range(initial_iter):
     ## Get random evaluation point
     while True:
-        x_rand = np.random.uniform(lowerBound, upperBound, 2)
+        x_rand = np.random.uniform(lowerBound, upperBound, d)
         if GP.X is None or not x_rand in GP.X:
             break
     ## EVALUATION OF THE OUTSIDE FUNCTION
@@ -78,9 +78,7 @@ if args.showplots:
 for l in range(total_iter):
     
     ## Search of the best acquisition function
-    x_best, acq_best = mesmo_acq(GP)
-    if args.showplots:        
-        GP.plotACQ(x_best, acq_best)
+    x_best, acq_best = mesmo_acq(GP, showplots = args.showplots)
 
     ## EVALUATION OF THE OUTSIDE FUNCTION
     y_best = evaluation(x_best,d)

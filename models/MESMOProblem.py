@@ -6,6 +6,7 @@ Date: Nov 2021
 from math import sqrt
 import numpy as np
 from scipy.stats import norm
+import sobol_seq
 
 from pymoo.core.problem import Problem
 
@@ -24,3 +25,13 @@ class MESMOProblem(Problem):
         pdf, cdf = norm.pdf(varphi), np.maximum(norm.cdf(varphi),1e-30)
         acq = varphi*pdf / (2*cdf) - np.log(cdf)
         out["F"] = np.column_stack(np.sum(acq,axis=3)[0])
+
+    def curve(self):
+        grid = sobol_seq.i4_sobol_generate(self.n_var,1000,np.random.randint(0,1000))
+        bound_grid = np.vectorize(lambda x : x*(self.xu[0]-self.xl[0])+self.xl[0])(grid)
+        mean, var = self.GPR.predict_y(bound_grid)
+
+        varphi = np.divide(np.subtract(self.maximums,mean),np.sqrt(var))
+        pdf, cdf = norm.pdf(varphi), np.maximum(norm.cdf(varphi),1e-30)
+        acq = varphi*pdf / (2*cdf) - np.log(cdf)
+        return bound_grid, np.sum(acq,axis=1)
