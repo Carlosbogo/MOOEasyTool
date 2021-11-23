@@ -4,52 +4,17 @@
 Date: 16-Nov 2021
 """
 
-from math import sqrt
 import os
 import numpy as np
-import sobol_seq
 import gpflow
-from gpflow.utilities import print_summary, set_trainable, to_default_float
 
 from utils import blockPrint, enablePrint
 from models.GaussianProcess import GaussianProcess
 from acquisition_functions.MESMO import mesmo_acq
 from arguments.arguments import MainArguments
 
-
 ### Definitions of outside parameters
-def XSquared(x,d):
-    res = 0
-    for i in range(d):
-        res+=x[i]*x[i]
-    return res
-
-def XRoot(x,d):
-    res = 0
-    for i in range(d):
-        res+=sqrt(x[i])
-    return res
-
-def f1(x,d):
-    res = 0
-    for i in range(d):
-        res+=(x[i]+0.5)*(x[i]+0.5)
-        res-=7/12
-    return res
-
-def f2(x,d):
-    res = 0
-    for i in range(d):
-        res+=(x[i]-0.5)*(x[i]-0.5)
-        res-=7/12
-    return res
-
-def f3(x,d):
-    res = 0
-    for i in range(d):
-        res+=x[i]*x[i]
-        res-=2/6
-    return res
+from benchmark import f1,f2,f3
 
 functions=[f1, f2, f3]
 constraints=[] 
