@@ -135,7 +135,44 @@ class GaussianProcess(object):
                 axs[i].plot(xx[:,0], samples[:, :, i].numpy().T, "C0", linewidth=0.5)
         plt.show()
 
-    def plotACQ(self, x_tries, acqs,x_best, acq):
+    def plotACQ(self, x_best, acq):
+        fig, axs = plt.subplots(nrows = self.O, ncols=self.d)
+        xx = np.linspace(self.lowerBound, self.upperBound, 100).reshape(100, 1)
+
+        if self.d >1:
+            for j in range(self.d):
+                grid = np.zeros((100,self.d))
+                grid[:,j]=xx[:,0]
+                mean, var = self.GPR.predict_y(grid)
+
+                for i in range(self.O):
+                    axs[i, j].plot(self.X[:,j], self.Y[:,i], 'kx', mew=2)
+                    axs[i, j].plot(grid[:,j], mean[:,i], 'C0', lw=2)
+                    axs[i, j].fill_between(grid[:,j],
+                                    mean[:,i] - 2*np.sqrt(var[:,i]),
+                                    mean[:,i] + 2*np.sqrt(var[:,i]),
+                                    color='C0', alpha=0.2)
+                        
+                    if i==0:
+                        axs[i, j].xaxis.set_label_position('top')
+                        axs[i, j].set_xlabel("x"+str(j))
+                    if j==0:
+                        axs[i, j].set_ylabel("y"+str(i))
+                    axs[i, j].axvline(x=x_best[j], color='r', label='x'+str(j)+'_best')
+
+        else:
+            mean, var = self.GPR.predict_y(xx)
+            for i in range(self.O):
+                axs[i].plot(self.X, self.Y[:,i], 'kx', mew=2)
+                axs[i].plot(xx[:,0], mean[:,i], 'C0', lw=2)
+                axs[i].fill_between(xx[:,0],
+                                mean[:,i] - 2*np.sqrt(var[:,i]),
+                                mean[:,i] + 2*np.sqrt(var[:,i]),
+                                color='C0', alpha=0.2)
+                    
+        plt.show()    
+
+    def plotACQS(self, x_tries, acqs,x_best, acq):
         fig, axs = plt.subplots(nrows = self.O+1, ncols=self.d)
         xx = np.linspace(self.lowerBound, self.upperBound, 100).reshape(100, 1)
 

@@ -48,6 +48,7 @@ NOTE2: Minimum noise is 1e-6 which is practically none
 
 * Implement cmd parameters
 * Study to fix 3.4 and 3.5 at the start of step 3
+* Final result, pareto front and pareto set
 
 ### Planning:
 
@@ -61,3 +62,5 @@ NOTE2: Minimum noise is 1e-6 which is practically none
 * Improve usage of bounds (each input variable its own bound) 
     * NOTE: Transform input variables instead of bounds?
 * Code and add many acquisition functions
+
+* Return values that u have not evaluated as pareto front

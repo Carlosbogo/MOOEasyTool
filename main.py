@@ -51,7 +51,7 @@ def f3(x,d):
         res-=2/6
     return res
 
-functions=[f1,f2,f3]
+functions=[f1, f2, f3]
 constraints=[] 
 def evaluation(x,d):
     y = [f(x,d) for f in functions]
@@ -83,9 +83,8 @@ initial_iter = args.initial_iter
 lowerBound = args.lower_bound
 upperBound = args.upper_bound
 
-
-grid = sobol_seq.i4_sobol_generate(d,1000,np.random.randint(0,1000))
-bound_grid = np.vectorize(lambda x : x*(upperBound-lowerBound)+lowerBound)(grid)
+# grid = sobol_seq.i4_sobol_generate(d,1000,np.random.randint(0,1000))
+# bound_grid = np.vectorize(lambda x : x*(upperBound-lowerBound)+lowerBound)(grid)
 
 ### Kernerl configuration 
 k = gpflow.kernels.SquaredExponential()
@@ -97,11 +96,12 @@ if args.save:
 
 ### Initial samples, at least 1
 for l in range(initial_iter):
+    ## Get random evaluation point
     while True:
-        index = np.random.choice(bound_grid.shape[0], 1)[0]  
-        x_rand = bound_grid[index]
+        x_rand = np.random.uniform(lowerBound, upperBound, 2)
         if GP.X is None or not x_rand in GP.X:
             break
+    ## EVALUATION OF THE OUTSIDE FUNCTION
     y_rand = evaluation(x_rand,d)
     GP.addSample(x_rand,y_rand, args.save, outputFile)
 
@@ -112,26 +112,15 @@ if args.showplots:
 
 for l in range(total_iter):
     
-    ## GRID SEARCH OVER THE INPUT SPACE FOR THE OPTIMUM
-    ## OF THE ACQUISITION FUNCTION
-    x_tries = bound_grid
-    acqs = mesmo_acq(x_tries, GP)
-
-    sorted_index = np.argsort(acqs)
-
-    x_best = x_tries[sorted_index[0]]
-
-    for index in sorted_index:
-        x_best = x_tries[index]
-        if not x_best in GP.X:
-            break
-    
+    ## Search of the best acquisition function
+    x_best, acq_best = mesmo_acq(GP)
     if args.showplots:        
-        GP.plotACQ(x_tries,acqs,x_best, acqs[sorted_index[0]])
+        GP.plotACQ(x_best, acq_best)
 
     ## EVALUATION OF THE OUTSIDE FUNCTION
     y_best = evaluation(x_best,d)
     
-    GP.addSample(x_best,y_best, args.save, outputFile)     ## Add new sample to the model
-    GP.updateGPR()                  ## Update data on the GP regressor
-    GP.optimizeKernel()             ## Optimize kernel hyperparameters
+    GP.addSample(x_best,y_best, args.save, outputFile)      ## Add new sample to the model
+    GP.updateGPR()                                          ## Update data on the GP regressor
+    GP.optimizeKernel()                                     ## Optimize kernel hyperparameters
+
