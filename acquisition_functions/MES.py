@@ -12,10 +12,10 @@ from pymoo.factory import get_termination
 from pymoo.optimize import minimize
 
 from models.GPProblem import GPProblem
-from models.MESMOProblem import MESMOProblem
+from models.MESProblem import MESProblem
 from models.GaussianProcess import GaussianProcess
 
-def mesmo_acq(GP: GaussianProcess, showplots: bool):
+def mes_acq(GP: GaussianProcess, showplots: bool):
 
     ## Compute pareto front
     problem = GPProblem(GP)
@@ -28,7 +28,7 @@ def mesmo_acq(GP: GaussianProcess, showplots: bool):
 
     ## Apply mesmoc acquisition function
 
-    problem = MESMOProblem(GP, np.array(maximums))
+    problem = MESProblem(GP, np.array(maximums))
     algorithm = NSGA2()
     termination = get_termination("n_gen", 40)
     res = minimize(problem, algorithm, termination)

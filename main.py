@@ -10,7 +10,7 @@ import gpflow
 
 from utils import blockPrint, enablePrint
 from models.GaussianProcess import GaussianProcess
-from acquisition_functions.MESMO import mesmo_acq
+from acquisition_functions.MES import mes_acq
 from arguments.arguments import MainArguments
 
 ### Definitions of outside parameters
@@ -78,7 +78,7 @@ if args.showplots:
 for l in range(total_iter):
     
     ## Search of the best acquisition function
-    x_best, acq_best = mesmo_acq(GP, showplots = args.showplots)
+    x_best, acq_best = mes_acq(GP, showplots = args.showplots)
 
     ## EVALUATION OF THE OUTSIDE FUNCTION
     y_best = evaluation(x_best,d)

@@ -12,7 +12,7 @@ from pymoo.core.problem import Problem
 
 from models.GaussianProcess import GaussianProcess
 
-class MESMOProblem(Problem):
+class MESProblem(Problem):
     def __init__(self, GP: GaussianProcess, maximums):
         super().__init__(n_var=GP.d, n_obj=GP.O, n_constr=GP.C, xl=np.array([GP.lowerBound]*GP.d), xu=np.array([GP.upperBound]*GP.d))
         self.GPR = GP.GPR
