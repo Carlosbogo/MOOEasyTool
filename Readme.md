@@ -64,3 +64,4 @@ NOTE2: Minimum noise is 1e-6 which is practically none
 * Code and add many acquisition functions
 
 * Return values that u have not evaluated as pareto front
+* Constrains reflexión y ver como lo soluciona Lobato y mejoras de analiticas y implementation

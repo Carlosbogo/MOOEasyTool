@@ -11,6 +11,7 @@ import gpflow
 from utils import blockPrint, enablePrint
 from models.GaussianProcess import GaussianProcess
 from acquisition_functions.MESMO import mesmo_acq
+from acquisition_functions.USEMO import usemo_acq
 from arguments.arguments import MainArguments
 
 ### Definitions of outside parameters
@@ -89,6 +90,23 @@ for l in range(total_iter):
     GP.optimizeKernel()                                     ## Optimize kernel hyperparameters
 
 
+def is_dominated(y, Y):
+    if Y is None:
+        return False
+    return any([all(el<=y) for el in Y])
+
+Y = GP.Y[np.argsort(GP.Y[:,0])]
+X = GP.X[np.argsort(GP.Y[:,0])]
+
+Pareto, index = None, np.array([])
+for idx, (x, y) in enumerate(zip(X, Y)):
+    if Pareto is None:
+        index = np.append(index, idx)
+        Pareto = np.array([y])
+    elif not is_dominated(y,Pareto):
+        Pareto = np.append(Pareto,[y], axis=0)
+        index = np.append(index, idx)
+
 from models.GPProblem import GPProblem
 from pymoo.algorithms.moo.nsga2 import NSGA2
 from pymoo.factory import get_termination
@@ -102,6 +120,7 @@ res = minimize(problem,
                 termination)
 import matplotlib.pyplot as plt
 plt.plot(res.X[:,0], res.X[:,1], 'o')
+plt.plot(X[index.astype(int)][:,0], X[index.astype(int)][:,1], 'ro')
 plt.show()
 import pdb
 pdb.set_trace()
