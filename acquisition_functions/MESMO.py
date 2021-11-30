@@ -12,8 +12,7 @@ from pymoo.optimize import minimize
 
 from models.ADFProblem import ADFProblem
 from models.GaussianProcess import GaussianProcess
-from ADFAlgorithm import ADF
-from calc_pareto import get_pareto_frontier, get_pareto_undominated_by
+from utils.calc_pareto import get_pareto_frontier, get_pareto_undominated_by
 
 def mesmo_acq(GP: GaussianProcess, M: int = 5, showplots: bool = False):
 

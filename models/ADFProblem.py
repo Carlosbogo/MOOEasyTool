@@ -10,7 +10,7 @@ from pymoo.core.problem import Problem
 from pymoo.core.problem import ElementwiseProblem
 
 from models.GaussianProcess import GaussianProcess
-from ADFAlgorithm import ADF
+from utils.ADFAlgorithm import ADF
 
 class ADFProblem(Problem):
     def __init__(self, GP: GaussianProcess, Paretos):

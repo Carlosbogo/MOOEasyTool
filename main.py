@@ -8,7 +8,6 @@ import os
 import numpy as np
 import gpflow
 
-from utils import blockPrint, enablePrint
 from models.GaussianProcess import GaussianProcess
 from acquisition_functions.MES import mes_acq
 from acquisition_functions.MESMO import mesmo_acq
@@ -30,9 +29,6 @@ C = len(constraints)
 ### Definition of inside parameters
 Aguments = MainArguments()
 args = Aguments.parse()
-
-if args.quiet:
-    blockPrint()
 
 outputFile = os.path.join(args.dir_path, args.output_file+'.csv')
 if args.save:

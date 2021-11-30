@@ -11,8 +11,6 @@ import matplotlib.patches as patches
 import gpflow
 import sobol_seq
 
-from ADFAlgorithm import ADF
-
 class GaussianProcess(object):
     def __init__(self, O:int, C:int, d:int, lowerBound: float, upperBound: float, kernel, X = None, Y = None, noise_variance=0.01):
         self.O = O
