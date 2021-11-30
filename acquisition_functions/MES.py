@@ -35,7 +35,7 @@ def mes_acq(GP: GaussianProcess, showplots: bool):
 
     if showplots:        
         x_tries, acqs = problem.curve() 
-        GP.plotMESMO(res.X[0], res.F[0], x_tries, acqs)
+        GP.plotMES(res.X[0], res.F[0], x_tries, acqs)
 
     return res.X[0], res.F[0]
 

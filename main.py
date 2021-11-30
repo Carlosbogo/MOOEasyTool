@@ -11,12 +11,13 @@ import gpflow
 from utils import blockPrint, enablePrint
 from models.GaussianProcess import GaussianProcess
 from acquisition_functions.MES import mes_acq
+from acquisition_functions.MESMO import mesmo_acq
 from arguments.arguments import MainArguments
 
 ### Definitions of outside parameters
 from benchmark import f1,f2,f3
 
-functions=[f1, f2, f3]
+functions=[f1, f2]
 constraints=[] 
 def evaluation(x,d):
     y = [f(x,d) for f in functions]
@@ -78,8 +79,7 @@ if args.showplots:
 for l in range(total_iter):
     
     ## Search of the best acquisition function
-    x_best, acq_best = mes_acq(GP, showplots = args.showplots)
-
+    x_best, acq_best = mesmo_acq(GP, showplots = args.showplots)
     ## EVALUATION OF THE OUTSIDE FUNCTION
     y_best = evaluation(x_best,d)
     

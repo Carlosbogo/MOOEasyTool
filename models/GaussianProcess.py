@@ -6,8 +6,12 @@ Date: Nov 2021
 
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 
 import gpflow
+import sobol_seq
+
+from ADFAlgorithm import ADF
 
 class GaussianProcess(object):
     def __init__(self, O:int, C:int, d:int, lowerBound: float, upperBound: float, kernel, X = None, Y = None, noise_variance=0.01):
@@ -135,7 +139,7 @@ class GaussianProcess(object):
                 axs[i].plot(xx[:,0], samples[:, :, i].numpy().T, "C0", linewidth=0.5)
         plt.show()
 
-    def plotMESMO(self, x_best, acq, x_tries, acqs):
+    def plotMES(self, x_best, acq, x_tries, acqs):
         fig, axs = plt.subplots(nrows = self.O+1, ncols=self.d)
         xx = np.linspace(self.lowerBound, self.upperBound, 100).reshape(100, 1)
 
@@ -161,7 +165,7 @@ class GaussianProcess(object):
                     # axs[i, j].axvline(x=x_best[j], color='r')
                 axs[self.O, j].plot(x_tries[:,j],acqs,'o', markersize=1)
                 axs[self.O, j].plot([x_best[j]], [acq],'or', markersize=4)
-                axs[self.O, j].set_ylim(acq-0.2, acq+2.2)
+                # axs[self.O, j].set_ylim(acq-0.2, acq+2.2)
 
         else:
             mean, var = self.GPR.predict_y(xx)
@@ -180,9 +184,44 @@ class GaussianProcess(object):
             
             axs[self.O].plot(x_tries[:,0],acqs,'o', markersize=1)
             axs[self.O].plot([x_best[0]], [acq],'or', markersize=4)
-            axs[self.O].set_ylim(acq-0.2, acq+2.2)
+            # axs[self.O].set_ylim(acq-0.2, acq+2.2)
                     
         plt.show()    
+
+    def plotADF(self, x_best, pareto):
+        import pdb
+        pdb.set_trace()
+        mean, var = self.GPR.predict_y(np.array([x_best]))
+
+        mean_p, var_p = ADF(mean, var, pareto)
+        fig, ax = plt.subplots()
+
+        ax.plot(pareto[:,0], pareto[:,1], 'o', markersize=1)
+        rect = patches.Rectangle((mean[0][0]-np.sqrt(var[0][0]), mean[0][1]-np.sqrt(var[0][1])), np.sqrt(var[0][0]), np.sqrt(var[0][0]), linewidth=2, edgecolor='k', facecolor='none')
+        ax.add_patch(rect)
+
+        rect = patches.Rectangle((mean_p[0][0]-np.sqrt(var_p[0][0]), mean_p[0][1]-np.sqrt(var_p[0][1])), np.sqrt(var_p[0][0]), np.sqrt(var_p[0][0]), linewidth=1, edgecolor='r', facecolor='none')
+        ax.add_patch(rect)
+        ax.set_xlim(-2,2)
+        ax.set_ylim(-2,2)
+        plt.show()
+
+    def plotObjectives(self, x_best, acq, x_tries):
+        fig, axs = plt.subplots(nrows = self.O+1, ncols=self.d)
+        xx = sobol_seq.i4_sobol_generate(self.d,1_000)
+
+        mean, var = self.GPR.predict_y(xx)
+        axs.plot(mean[:,0], mean[:,1], 'C0', lw=2)
+        axs.fill_between(mean[:,0],
+                mean[:,0] - 2*np.sqrt(var[:,0]),
+                mean[:,0] + 2*np.sqrt(var[:,0]),
+                color='C0', alpha=0.2)
+
+        y_best, _ = self.GPR.predict_y(np.array([x_best]))
+        axs.plot(y_best[0][0], y_best[0][1])
+
+        plt.show()
+
 
     def plotACQS(self, x_tries, acqs,x_best, acq):
         fig, axs = plt.subplots(nrows = self.O+1, ncols=self.d)

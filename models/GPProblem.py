@@ -16,4 +16,4 @@ class GPProblem(Problem):
 
     def _evaluate(self, x, out, *args, **kwargs):
         mean, _ = self.GPR.predict_y(np.array([[x]]))
-        out["F"] = np.column_stack(mean.numpy().tolist()[0])
+        out["F"] = np.column_stack(mean[0])
