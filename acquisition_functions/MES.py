@@ -3,35 +3,25 @@
 
 Date: Nov 2021
 """
-from math import sqrt
-from scipy.stats import norm
-import numpy as np
+import tensorflow as tf
 
 from pymoo.algorithms.moo.nsga2 import NSGA2
 from pymoo.factory import get_termination
 from pymoo.optimize import minimize
+import sobol_seq
 
-from models.GPProblem import GPProblem
 from models.MESProblem import MESProblem
 from models.GaussianProcess import GaussianProcess
 
-def mes_acq(GP: GaussianProcess, showplots: bool):
+def mes_acq(GP: GaussianProcess, N: int = 1_000, M: int = 5, showplots: bool = False):
+    
+    xx = sobol_seq.i4_sobol_generate(GP.d,1_000)
+    samples = GP.GPR.predict_f_samples(xx,M)
+    optimums = tf.math.reduce_min(samples, axis = 1)
 
-    ## Compute pareto front
-    problem = GPProblem(GP)
-    algorithm = NSGA2()
-    termination = get_termination("n_gen", 40)
-    res = minimize(problem,
-                   algorithm,
-                   termination)
-    maximums = [min(res.F[:,i]) for i in range(GP.O)]
-
-    ## Apply mesmoc acquisition function
-
-    problem = MESProblem(GP, np.array(maximums))
-    algorithm = NSGA2()
-    termination = get_termination("n_gen", 40)
-    res = minimize(problem, algorithm, termination)
+    problem = MESProblem(GP, optimums)
+    algorithm = NSGA2(pop_size=10)
+    res = minimize(problem, algorithm)
 
     if showplots:        
         x_tries, acqs = problem.curve() 

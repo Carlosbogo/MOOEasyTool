@@ -7,7 +7,6 @@ import numpy as np
 import tensorflow as tf
 import sobol_seq
 from pymoo.core.problem import Problem
-from pymoo.core.problem import ElementwiseProblem
 
 from models.GaussianProcess import GaussianProcess
 from utils.ADFAlgorithm import ADF

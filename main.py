@@ -45,9 +45,6 @@ initial_iter = args.initial_iter
 lowerBound = args.lower_bound
 upperBound = args.upper_bound
 
-# grid = sobol_seq.i4_sobol_generate(d,1000,np.random.randint(0,1000))
-# bound_grid = np.vectorize(lambda x : x*(upperBound-lowerBound)+lowerBound)(grid)
-
 ### Kernerl configuration 
 k = gpflow.kernels.SquaredExponential()
 ### GPs Initialization

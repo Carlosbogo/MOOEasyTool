@@ -11,6 +11,8 @@ import matplotlib.patches as patches
 import gpflow
 import sobol_seq
 
+from utils.ADFAlgorithm import ADF
+
 class GaussianProcess(object):
     def __init__(self, O:int, C:int, d:int, lowerBound: float, upperBound: float, kernel, X = None, Y = None, noise_variance=0.01):
         self.O = O
@@ -163,7 +165,7 @@ class GaussianProcess(object):
                     # axs[i, j].axvline(x=x_best[j], color='r')
                 axs[self.O, j].plot(x_tries[:,j],acqs,'o', markersize=1)
                 axs[self.O, j].plot([x_best[j]], [acq],'or', markersize=4)
-                # axs[self.O, j].set_ylim(acq-0.2, acq+2.2)
+                axs[self.O, j].set_ylim(acq-0.2, acq+2.2)
 
         else:
             mean, var = self.GPR.predict_y(xx)
@@ -182,7 +184,7 @@ class GaussianProcess(object):
             
             axs[self.O].plot(x_tries[:,0],acqs,'o', markersize=1)
             axs[self.O].plot([x_best[0]], [acq],'or', markersize=4)
-            # axs[self.O].set_ylim(acq-0.2, acq+2.2)
+            axs[self.O].set_ylim(acq-0.2, acq+2.2)
                     
         plt.show()    
 
@@ -219,7 +221,6 @@ class GaussianProcess(object):
         axs.plot(y_best[0][0], y_best[0][1])
 
         plt.show()
-
 
     def plotACQS(self, x_tries, acqs,x_best, acq):
         fig, axs = plt.subplots(nrows = self.O+1, ncols=self.d)
