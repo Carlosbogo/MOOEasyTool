@@ -3,7 +3,6 @@
 
 Date: Nov 2021
 """
-import numpy as np
 from scipy.stats import norm
 import tensorflow as tf
 

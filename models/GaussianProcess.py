@@ -189,8 +189,6 @@ class GaussianProcess(object):
         plt.show()    
 
     def plotADF(self, x_best, pareto):
-        import pdb
-        pdb.set_trace()
         mean, var = self.GPR.predict_y(np.array([x_best]))
 
         mean_p, var_p = ADF(mean, var, pareto)
