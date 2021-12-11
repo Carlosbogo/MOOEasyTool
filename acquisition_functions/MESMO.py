@@ -13,13 +13,33 @@ from models.ADFProblem import ADFProblem
 from models.GaussianProcess import GaussianProcess
 from utils.ParetoSample import getParetoFrontSamples
 
-def mesmo_acq(GP: GaussianProcess, N: int = 1_000, M: int = 5, showplots: bool = False):
+mesmo_acq_hp = {
+    'id' : 3,
+    'name' : "MESMO",
+    'help' : "This function develops mesmo procedure described by Fernandez-Sanchez(2020).",
+    'hps' : [
+        {
+            'name' : 'N',
+            'type': "%d",
+            'help': "Number of points to generate samples",
+            'default': 1_000
+        },
+        {
+            'name' : 'M',
+            'type': "%d",
+            'help': "Number of samples (Pareto fronts) to generate",
+            'default': 50
+        }
+    ]
+}
+
+def mesmo_acq(GP: GaussianProcess, N: int = 1_000, M: int = 50, showplots: bool = False):
 
     Paretos = getParetoFrontSamples(GP, N, M)
 
     problem = ADFProblem(GP, np.array(Paretos))
-    algorithm = NSGA2(pop_size=50)
-    termination = get_termination("n_gen", 4)
+    algorithm = NSGA2()
+    termination = get_termination("n_gen", 10)
     res = minimize(problem,
                    algorithm,
                    termination,

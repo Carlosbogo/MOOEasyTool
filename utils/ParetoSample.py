@@ -36,13 +36,4 @@ def getParetoFrontSamples(GP: GaussianProcess, N: int = 1_000, M: int = 5):
         pareto = get_pareto_undominated_by(sample)
         Paretos.append(pareto)
 
-        # import matplotlib.pyplot as plt
-        # plt.plot(sample[:,0], sample[:,1], 'o', markersize=4)
-        # plt.plot(pareto[:,0], pareto[:,1], 'ro', markersize=2)
-        # plt.show()
-
-
-
-
-    
     return Paretos
