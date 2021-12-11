@@ -42,13 +42,13 @@ np.random.seed(seed)
 total_iter = args.total_iter
 initial_iter = args.initial_iter
 
-lowerBound = args.lower_bound
-upperBound = args.upper_bound
+lowerBounds = [args.lower_bound]*d
+upperBounds = [args.upper_bound]*d
 
 ### Kernerl configuration 
 k = gpflow.kernels.SquaredExponential()
 ### GPs Initialization
-GP = GaussianProcess(O, C, d, lowerBound, upperBound, k, noise_variance=2e-6)
+GP = GaussianProcess(O, C, d, lowerBounds, upperBounds, k, noise_variance=2e-6)
 
 if args.save:
     GP.writeGPHeader(outputFile)
@@ -57,7 +57,7 @@ if args.save:
 for l in range(initial_iter):
     ## Get random evaluation point
     while True:
-        x_rand = np.random.uniform(lowerBound, upperBound, d)
+        x_rand = np.random.uniform(lowerBounds[0], upperBounds[0], d)
         if GP.X is None or not x_rand in GP.X:
             break
     ## EVALUATION OF THE OUTSIDE FUNCTION

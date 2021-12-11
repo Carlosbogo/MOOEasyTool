@@ -13,7 +13,7 @@ from utils.ADFAlgorithm import ADF
 
 class ADFProblem(Problem):
     def __init__(self, GP: GaussianProcess, Paretos):
-        super().__init__(n_var=GP.d, n_obj=1, n_constr=0, xl=np.array([GP.lowerBound]*GP.d), xu=np.array([GP.upperBound]*GP.d))
+        super().__init__(n_var=GP.d, n_obj=1, n_constr=0, xl=np.array(GP.lowerBounds), xu=np.array(GP.upperBounds))
         self.GPR = GP.GPR
         self.Paretos = Paretos
 

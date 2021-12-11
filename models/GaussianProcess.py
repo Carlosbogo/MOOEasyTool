@@ -14,12 +14,12 @@ import sobol_seq
 from utils.ADFAlgorithm import ADF
 
 class GaussianProcess(object):
-    def __init__(self, O:int, C:int, d:int, lowerBound: float, upperBound: float, kernel, X = None, Y = None, noise_variance=0.01):
+    def __init__(self, O:int, C:int, d:int, lowerBounds: float, upperBounds: float, kernel, X = None, Y = None, noise_variance=0.01):
         self.O = O
         self.C = C
         self.d = d
-        self.lowerBound = lowerBound
-        self.upperBound = upperBound
+        self.lowerBounds = lowerBounds
+        self.upperBounds = upperBounds
         self.kernel = kernel
         self.X = X
         self.Y = Y
@@ -40,8 +40,8 @@ class GaussianProcess(object):
     def updateGPR(self):
         self.GPR = gpflow.models.GPR(
             [self.X, self.Y],
-            kernel= self.kernel, 
-            noise_variance=self.noise_variance)
+            kernel = self.kernel, 
+            noise_variance = self.noise_variance)
 
     def optimizeKernel(self):
         self.opt.minimize(
@@ -76,7 +76,7 @@ class GaussianProcess(object):
     def plot(self):
 
         fig, axs = plt.subplots(nrows = self.O, ncols=self.d)
-        xx = np.linspace(self.lowerBound, self.upperBound, 100).reshape(100, 1)
+        xx = np.linspace(self.lowerBounds[0], self.upperBounds[0], 100).reshape(100, 1)
 
         if self.d >1:
             for j in range(self.d):
@@ -104,7 +104,7 @@ class GaussianProcess(object):
 
     def plotSamples(self, n_samples=5):
         fig, axs = plt.subplots(nrows = self.O, ncols=self.d)
-        xx = np.linspace(self.lowerBound, self.upperBound, 100).reshape(100, 1)
+        xx = np.linspace(self.lowerBounds[0], self.upperBounds[0], 100).reshape(100, 1)
 
         if self.d >1:
             for j in range(self.d):
@@ -141,7 +141,7 @@ class GaussianProcess(object):
 
     def plotMES(self, x_best, acq, x_tries, acqs):
         fig, axs = plt.subplots(nrows = self.O+1, ncols=self.d)
-        xx = np.linspace(self.lowerBound, self.upperBound, 100).reshape(100, 1)
+        xx = np.linspace(self.lowerBounds[0], self.upperBounds[0], 100).reshape(100, 1)
 
         if self.d >1:
             for j in range(self.d):
@@ -222,7 +222,7 @@ class GaussianProcess(object):
 
     def plotACQS(self, x_tries, acqs,x_best, acq):
         fig, axs = plt.subplots(nrows = self.O+1, ncols=self.d)
-        xx = np.linspace(self.lowerBound, self.upperBound, 100).reshape(100, 1)
+        xx = np.linspace(self.lowerBounds[0], self.upperBounds[0], 100).reshape(100, 1)
 
         if self.d >1:
             for j in range(self.d):

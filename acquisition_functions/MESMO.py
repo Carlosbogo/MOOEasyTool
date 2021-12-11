@@ -33,7 +33,7 @@ mesmo_acq_hp = {
     ]
 }
 
-def mesmo_acq(GP: GaussianProcess, N: int = 1_000, M: int = 50, showplots: bool = False):
+def mesmo_acq(GP: GaussianProcess, N: int = 1_000, M: int = 5, showplots: bool = False):
 
     Paretos = getParetoFrontSamples(GP, N, M)
 

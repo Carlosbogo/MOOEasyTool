@@ -15,7 +15,7 @@ from models.GaussianProcess import GaussianProcess
 
 class MESProblem(Problem):
     def __init__(self, GP: GaussianProcess, optimums):
-        super().__init__(n_var=GP.d, n_obj=GP.O, n_constr=GP.C, xl=np.array([GP.lowerBound]*GP.d), xu=np.array([GP.upperBound]*GP.d))
+        super().__init__(n_var=GP.d, n_obj=GP.O, n_constr=GP.C, xl=np.array(GP.lowerBounds), xu=np.array(GP.upperBounds))
         self.GPR = GP.GPR
         self.optimums = optimums
 
