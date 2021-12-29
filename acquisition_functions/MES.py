@@ -61,7 +61,12 @@ def mes_acq(GP: GaussianProcess, N: int = 1_000, M: int = 50, showplots: bool = 
         x_tries, acqs = problem.curve() 
         GP.plotMES(res.X[0], res.F[0], x_tries, acqs)
 
-    return res.X[0], res.F[0]
+    if (len(res.X.shape)>1):
+        res_x = res.X[0]
+    else:
+        res_x = res.X
+
+    return res_x, res.F[0]
 
 def basic_mes_acq(GP: GaussianProcess, N: int = 1_000, M: int = 50,showplots: bool = False):
     xx = sobol_seq.i4_sobol_generate(GP.d,N)
@@ -76,4 +81,9 @@ def basic_mes_acq(GP: GaussianProcess, N: int = 1_000, M: int = 50,showplots: bo
         x_tries, acqs = problem.curve() 
         GP.plotMES(res.X[0], res.F[0], x_tries, acqs)
 
-    return res.X[0], res.F[0]
+    if (len(res.X.shape)>1):
+        res_x = res.X[0]
+    else:
+        res_x = res.X
+
+    return res_x, res.F[0]
