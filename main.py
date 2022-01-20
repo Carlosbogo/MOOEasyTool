@@ -10,6 +10,7 @@ import gpflow
 
 from models.GaussianProcess import GaussianProcess
 from acquisition_functions.MES import mes_acq
+from acquisition_functions.PESMO import pesmo_acq
 from acquisition_functions.MESMO import mesmo_acq
 from arguments.arguments import MainArguments
 

@@ -3,7 +3,7 @@ import sobol_seq
 from models.GaussianProcess import GaussianProcess
 import numpy as np
 import tensorflow as tf
-from utils.calc_pareto import get_pareto_frontier, get_pareto_undominated_by
+from utils.calc_pareto import get_pareto_frontier, get_pareto_undominated_by, getSetfromFront
 
 def generateLinspaceGrid(N: int, D: int):
 
@@ -37,3 +37,40 @@ def getParetoFrontSamples(GP: GaussianProcess, N: int = 1_000, M: int = 5):
         Paretos.append(pareto)
 
     return Paretos
+
+def getParetoSetSamples(GP: GaussianProcess, N: int = 1_000, M: int = 5):
+
+    Paretos = []
+    xx = sobol_seq.i4_sobol_generate(GP.d,N)
+    samples = GP.GPR.predict_f_samples(xx,M)
+    for sample in samples:
+
+        pareto_front = get_pareto_undominated_by(sample)
+        pareto_set = getSetfromFront(xx,samples,pareto_front)
+        Paretos.append(pareto_set)
+
+    return Paretos
+
+def getParetoSamples(GP: GaussianProcess, N: int = 1_000, M: int = 5):
+
+    Pareto_fronts, Pareto_sets = [], []
+    xx = sobol_seq.i4_sobol_generate(GP.d,N)
+    samples = GP.GPR.predict_f_samples(xx,M)
+
+    for sample in samples:
+        pareto_front = get_pareto_undominated_by(sample.numpy())
+        Pareto_fronts.append(pareto_front)
+
+        pareto_set = getSetfromFront(xx,sample,pareto_front)
+        Pareto_sets.append(pareto_set)
+
+        # fig, axs = plt.subplots(1,2)
+        # axs[0].plot(pareto_set[:,0],pareto_set[:,1],'ro', markersize=2)
+        # axs[0].plot(xx[:,0],xx[:,1],'o', markersize=1)
+
+        # axs[1].plot(pareto_front[:,0],pareto_front[:,1],'ro', markersize=2)
+        # axs[1].plot(sample[:,0],sample[:,1],'o', markersize=1)
+
+        # plt.show()
+    return Pareto_sets, Pareto_fronts
+

@@ -20,6 +20,16 @@ def get_pareto_undominated_by(pts1, pts2=None):
         pts2 = pts1
     return reduce(filter_, pts2, pts1)
 
+def getSetfromFront(xvalues, yvalues, front):
+    res = None
+    for y in front:
+        x = xvalues[np.where(np.all(yvalues==y,axis=1))[0]]
+        if res is None:
+            res = np.array(x)
+        else:
+            res = np.append(res,x, axis=0)
+
+    return res
 
 def get_pareto_frontier(pts):
     """

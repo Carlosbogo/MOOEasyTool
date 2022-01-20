@@ -12,6 +12,7 @@ import gpflow
 import sobol_seq
 
 from utils.ADFAlgorithm import ADF
+from utils.EPAlgorithm import EP
 
 class GaussianProcess(object):
     def __init__(self, O:int, C:int, d:int, lowerBounds: float, upperBounds: float, kernel, X = None, Y = None, noise_variance=0.01):
@@ -25,7 +26,7 @@ class GaussianProcess(object):
         self.Y = Y
         self.noise_variance = noise_variance
         self.opt = gpflow.optimizers.Scipy()
-        self.GPR = None
+        self.GPR : gpflow.models.GPR = None
 
     def addSample(self, x, y, save=False, filename=None):
         if self.X is None or self.Y is None:
@@ -203,6 +204,29 @@ class GaussianProcess(object):
         ax.set_xlim(-2,2)
         ax.set_ylim(-2,2)
         plt.show()
+    
+    def plotEP(self, x_best, pareto):
+        mean, var = self.GPR.predict_y(np.array([x_best]))
+        means, vars = self.GPR.predict_y(np.array(pareto))
+        mean_p, var_p = EP(mean, var, means, vars)
+
+        fig, axs = plt.subplots(2)
+
+        axs[0].plot(pareto[:,0], pareto[:,1], 'o', markersize=1)
+        axs[0].plot(x_best[0], x_best[1], 'ro', markersize=1)
+
+        axs[1].plot(means[:,0],means[:,1],'o',markersize=1)
+        rect = patches.Rectangle((mean[0][0]-np.sqrt(var[0][0]), mean[0][1]-np.sqrt(var[0][1])), np.sqrt(var[0][0]), np.sqrt(var[0][0]), linewidth=2, edgecolor='k', facecolor='none')
+        axs[1].add_patch(rect)
+
+        rect = patches.Rectangle((mean_p[0][0]-np.sqrt(var_p[0][0]), mean_p[0][1]-np.sqrt(var_p[0][1])), np.sqrt(var_p[0][0]), np.sqrt(var_p[0][0]), linewidth=1, edgecolor='r', facecolor='none')
+        axs[1].add_patch(rect)
+        axs[1].set_xlim(-2,2)
+        axs[1].set_ylim(-2,2)
+        plt.show()
+
+        import pdb
+        pdb.set_trace()
 
     def plotObjectives(self, x_best, acq, x_tries):
         fig, axs = plt.subplots(nrows = self.O+1, ncols=self.d)
