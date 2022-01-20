@@ -14,18 +14,6 @@ from acquisition_functions.PESMO import pesmo_acq
 from acquisition_functions.MESMO import mesmo_acq
 from arguments.arguments import MainArguments
 
-### Definitions of outside parameters
-from benchmark import f1,f2,f3
-
-functions=[f1, f2]
-constraints=[] 
-def evaluation(x,d):
-    y = [f(x,d) for f in functions]
-    c = [f(x,d) for f in constraints]
-    return np.array(y+c)
-
-O = len(functions)
-C = len(constraints)
 
 ### Definition of inside parameters
 Aguments = MainArguments()
@@ -45,6 +33,24 @@ initial_iter = args.initial_iter
 
 lowerBounds = [args.lower_bound]*d
 upperBounds = [args.upper_bound]*d
+
+
+### Definitions of outside parameters
+from benchmark import f1,f2,f3, GPRandomFunction
+
+# functions=[f1, f2]
+# constraints=[] 
+# def evaluation(x,d):
+#     y = [f(x,d) for f in functions]
+#     c = [f(x,d) for f in constraints]
+#     return np.array(y+c)
+
+O = 2
+C = 0
+
+def evaluation(x,d):
+    mean, _ = GPRandomFunction(O, d, lowerBounds, upperBounds)(np.array([x]))
+    return mean[0]
 
 ### Kernerl configuration 
 k = gpflow.kernels.SquaredExponential()
@@ -77,6 +83,7 @@ for l in range(total_iter):
     ## EVALUATION OF THE OUTSIDE FUNCTION
     y_best = evaluation(x_best,d)
     
+    ## UPDATE
     GP.addSample(x_best,y_best, args.save, outputFile)      ## Add new sample to the model
     GP.updateGPR()                                          ## Update data on the GP regressor
     GP.optimizeKernel()                                     ## Optimize kernel hyperparameters

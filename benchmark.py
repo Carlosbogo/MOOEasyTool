@@ -1,5 +1,7 @@
 from math import sqrt
-
+import numpy as np
+import gpflow
+import sobol_seq
 
 def XSquared(x,d):
     res = 0
@@ -33,3 +35,17 @@ def f3(x,d):
         res+=x[i]*x[i]
         res-=2/6
     return res
+
+def GPRandomFunction(O:int, d:int, lowerBounds: float, upperBounds: float):
+
+    k = gpflow.kernels.SquaredExponential()
+    GPR = gpflow.models.GPR([np.array([[0.]*d]),np.array([[0.]*O])], kernel = k)
+
+    xx = sobol_seq.i4_sobol_generate(d,100)
+    sample = GPR.predict_f_samples(xx,1)
+
+    GPR = gpflow.models.GPR([xx,sample[0]], kernel = k)
+
+    return GPR.predict_y
+
+
