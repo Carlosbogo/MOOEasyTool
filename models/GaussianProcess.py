@@ -7,12 +7,18 @@ Date: Nov 2021
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+from utils.distances import directed_hausdorff
+
+from pymoo.optimize import minimize
+from pymoo.algorithms.moo.nsga2 import NSGA2
+from pymoo.factory import get_termination
 
 import gpflow
 import sobol_seq
 
 from utils.ADFAlgorithm import ADF
 from utils.EPAlgorithm import EP
+from models.GPProblem import GPProblem
 
 class GaussianProcess(object):
     def __init__(self, O:int, C:int, d:int, lowerBounds: float, upperBounds: float, kernel, X = None, Y = None, noise_variance=0.01):
@@ -281,3 +287,35 @@ class GaussianProcess(object):
             axs[self.O].set_ylim(acq-0.2, acq+2.2)
             
         plt.show()
+
+    def evaluatePareto(self, reference = None, showparetos: bool = False, saveparetos: bool = False):
+
+        problem = GPProblem(self)
+        res = minimize(problem,
+                NSGA2(),
+                get_termination("n_gen", 40),
+                save_history=True,
+                verbose=False)
+
+        (distancia1,i1,j1) = directed_hausdorff(res.F, reference)
+        print("distancia1", distancia1)
+        (distancia2,i2,j2) = directed_hausdorff(reference, res.F)
+        print("distancia2", distancia2)
+          
+        s1 = np.array([res.F[i1], reference[j1]])
+        s2 = np.array([reference[i2], res.F[j2]])
+        plt.plot(s1[:,0], s1[:,1], 'b', label="d1  "+ str(distancia1))
+        plt.plot(s2[:,0], s2[:,1], 'b', label="d2  " + str(distancia2))
+        
+        F = res.F[np.argsort(res.F[:,1])]
+        plt.plot(F[:,0],F[:,1], 'k', label='Pareto front')
+        plt.plot(reference[:,0],reference[:,1], 'r', label='Pareto real')
+        plt.legend()
+
+        if saveparetos:  
+            plt.savefig("ImagesExp/"+str(len(self.X))+'.png')
+        if showparetos:
+            plt.show()
+        plt.clf()
+
+        return res.F, distancia1 if distancia1>distancia2 else distancia2, distancia1, distancia2
