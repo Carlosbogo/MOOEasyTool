@@ -19,3 +19,9 @@ def crossit(xx):
     fact2 = np.exp(abs(100 - np.sqrt(x1**2+x2**2)/np.pi))
 
     return -0.0001 * (abs(fact1*fact2)+1)**0.1
+
+def crossitNdim(xx):
+    fact1 = np.prod(np.sin(xx))
+    fact2 = np.exp(abs(100 - np.sqrt(np.sum(xx**2))/np.pi))
+
+    return -0.0001 * (abs(fact1*fact2)+1)**0.1

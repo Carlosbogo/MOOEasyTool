@@ -42,6 +42,9 @@ upperBounds = [args.upper_bound]*d
 ### Definitions of outside parameters
 evaluation = MOOackley
 
+O = 2
+C = 0
+
 N = 10_001
 X = np.linspace(args.lower_bound,args.upper_bound,N)
 Z = np.zeros((N,2))
@@ -63,8 +66,7 @@ plt.plot(np.reshape(Z,(-1,2))[:,0], np.reshape(Z,(-1,2))[:,1], 'kx')
 plt.plot(real_pareto[:,0], real_pareto[:,1], 'rx')
 plt.show()
 
-O = 2
-C = 0
+
 
 ### Kernerl configuration 
 k = gpflow.kernels.SquaredExponential()
