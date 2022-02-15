@@ -298,9 +298,9 @@ class GaussianProcess(object):
                 verbose=False)
 
         (distancia1,i1,j1) = directed_hausdorff(res.F, reference)
-        print("distancia1", distancia1)
+        # print("distancia1", distancia1)
         (distancia2,i2,j2) = directed_hausdorff(reference, res.F)
-        print("distancia2", distancia2)
+        # print("distancia2", distancia2)
           
         s1 = np.array([res.F[i1], reference[j1]])
         s2 = np.array([reference[i2], res.F[j2]])
