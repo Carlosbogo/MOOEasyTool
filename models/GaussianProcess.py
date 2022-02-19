@@ -7,7 +7,7 @@ Date: Nov 2021
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
-from utils.distances import directed_hausdorff
+from utils.distances import directed_hausdorff, getHyperVolume
 
 from pymoo.optimize import minimize
 from pymoo.algorithms.moo.nsga2 import NSGA2
@@ -214,25 +214,23 @@ class GaussianProcess(object):
     def plotEP(self, x_best, pareto):
         mean, var = self.GPR.predict_y(np.array([x_best]))
         means, vars = self.GPR.predict_y(np.array(pareto))
-        mean_p, var_p = EP(mean, var, means, vars)
+        mean_p, var_p = EP(mean[0], var[0], means, vars)
 
         fig, axs = plt.subplots(2)
-
-        axs[0].plot(pareto[:,0], pareto[:,1], 'o', markersize=1)
-        axs[0].plot(x_best[0], x_best[1], 'ro', markersize=1)
-
+    
+        if self.d>1:
+            axs[0].plot(pareto[:,0], pareto[:,1], 'o', markersize=1)
+            axs[0].plot(x_best[0], x_best[1], 'ro', markersize=1)
+        else:
+            axs[0].plot(pareto, [1 for _ in pareto], 'o', markersize=1)
+            axs[0].plot(x_best, [1], 'o', markersize=1)
         axs[1].plot(means[:,0],means[:,1],'o',markersize=1)
         rect = patches.Rectangle((mean[0][0]-np.sqrt(var[0][0]), mean[0][1]-np.sqrt(var[0][1])), np.sqrt(var[0][0]), np.sqrt(var[0][0]), linewidth=2, edgecolor='k', facecolor='none')
         axs[1].add_patch(rect)
 
         rect = patches.Rectangle((mean_p[0][0]-np.sqrt(var_p[0][0]), mean_p[0][1]-np.sqrt(var_p[0][1])), np.sqrt(var_p[0][0]), np.sqrt(var_p[0][0]), linewidth=1, edgecolor='r', facecolor='none')
         axs[1].add_patch(rect)
-        axs[1].set_xlim(-2,2)
-        axs[1].set_ylim(-2,2)
         plt.show()
-
-        import pdb
-        pdb.set_trace()
 
     def plotObjectives(self, x_best, acq, x_tries):
         fig, axs = plt.subplots(nrows = self.O+1, ncols=self.d)
@@ -298,24 +296,30 @@ class GaussianProcess(object):
                 verbose=False)
 
         (distancia1,i1,j1) = directed_hausdorff(res.F, reference)
-        # print("distancia1", distancia1)
         (distancia2,i2,j2) = directed_hausdorff(reference, res.F)
-        # print("distancia2", distancia2)
           
-        s1 = np.array([res.F[i1], reference[j1]])
-        s2 = np.array([reference[i2], res.F[j2]])
-        plt.plot(s1[:,0], s1[:,1], 'b', label="d1  "+ str(distancia1))
-        plt.plot(s2[:,0], s2[:,1], 'b', label="d2  " + str(distancia2))
+        plt.arrow(res.F[i1,0], res.F[i1,1], reference[j1,0]-res.F[i1,0], reference[j1,1]-res.F[i1,1],
+            head_width  = (abs(reference[j1,0]-res.F[i1,0]) + abs(reference[j1,1]-res.F[i1,1]))/30,
+            head_length = (abs(reference[j1,0]-res.F[i1,0]) + abs(reference[j1,1]-res.F[i1,1]))/20, 
+            length_includes_head = True,
+            label="d1  "+ str(distancia1))        
+        plt.arrow(reference[i2][0], reference[i2][1], res.F[j2][0]-reference[i2][0], res.F[j2][1]-reference[i2][1],
+            head_width  = (abs(res.F[j2][0]-reference[i2][0]) + abs(res.F[j2][1]-reference[i2][1]))/30,
+            head_length = (abs(res.F[j2][0]-reference[i2][0]) + abs(res.F[j2][1]-reference[i2][1]))/20, 
+            length_includes_head = True,
+            label="d2  "+ str(distancia1))
         
         F = res.F[np.argsort(res.F[:,1])]
-        plt.plot(F[:,0],F[:,1], 'k', label='Pareto front')
-        plt.plot(reference[:,0],reference[:,1], 'r', label='Pareto real')
+        plt.plot(F[:,0], F[:,1], 'b', label='Pareto front')
+        plt.plot(reference[:,0], reference[:,1], 'r', label='Pareto real')
         plt.legend()
 
         if saveparetos:  
             plt.savefig("ImagesExp/"+str(len(self.X))+'.png')
         if showparetos:
+            print(distancia1, distancia2, getHyperVolume(res.F[np.argsort(res.F[:,0])]), getHyperVolume(reference))
             plt.show()
         plt.clf()
 
-        return res.F, distancia1 if distancia1>distancia2 else distancia2, distancia1, distancia2
+        return res.F, distancia1 if distancia1>distancia2 else distancia2, distancia1, distancia2, abs(getHyperVolume(res.F[np.argsort(res.F[:,0])])-getHyperVolume(reference))
+

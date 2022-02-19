@@ -24,3 +24,14 @@ def hausdorff(xx,yy):
         return (d1,x1,y1)
     else:
         return (d2,x2,y2)
+
+def getHyperVolume(front, reference = None):
+    if reference is None:
+        reference = [0,0]
+
+    hypervolume = 0
+
+    for el in front:
+        hypervolume+=(el[0]-reference[0])*(el[1]-reference[1])
+        reference[1]=el[1]
+    return hypervolume

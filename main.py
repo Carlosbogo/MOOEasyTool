@@ -16,7 +16,7 @@ from acquisition_functions.PESMO import pesmo_acq
 from acquisition_functions.MESMO import mesmo_acq
 from arguments.arguments import MainArguments
 
-from MOObenchmark import MOOackley
+from MOObenchmark import MOOackley, MOOquadratic
 from utils.calc_pareto import get_pareto_undominated_by, getSetfromFront
 
 ### Definition of inside parameters
@@ -40,7 +40,8 @@ upperBounds = [args.upper_bound]*d
 
 
 ### Definitions of outside parameters
-evaluation = MOOackley
+def evaluation(x):
+    return MOOquadratic(x, c1=-.5, c2=.5)
 
 O = 2
 C = 0
@@ -55,18 +56,6 @@ for i in range(N):
 real_pareto = get_pareto_undominated_by(np.reshape(Z,(-1,2)))
 real_pareto = real_pareto[np.argsort(real_pareto[:,1])]
 pareto_set = getSetfromFront(X,Z,real_pareto)
-
-plt.plot(X, Z[:,0], 'b')
-plt.plot(X, Z[:,1], 'k')
-plt.plot(pareto_set, real_pareto[:,0], 'xr', markersize=5)
-plt.plot(pareto_set, real_pareto[:,1], 'xr', markersize=5)
-plt.show()
-
-plt.plot(np.reshape(Z,(-1,2))[:,0], np.reshape(Z,(-1,2))[:,1], 'kx')
-plt.plot(real_pareto[:,0], real_pareto[:,1], 'rx')
-plt.show()
-
-
 
 ### Kernerl configuration 
 k = gpflow.kernels.SquaredExponential()
@@ -95,6 +84,7 @@ if args.showplots:
 distancias = []
 ds1 = []
 ds2 = []
+hps = []
 
 for l in range(total_iter):
     
@@ -108,10 +98,11 @@ for l in range(total_iter):
     GP.updateGPR()                                          ## Update data on the GP regressor
     GP.optimizeKernel()                                     ## Optimize kernel hyperparameters
 
-    pareto, distancia, d1, d2 = GP.evaluatePareto(real_pareto, showparetos = args.showparetos, saveparetos=args.saveparetos)
+    pareto, distancia, d1, d2, hp = GP.evaluatePareto(real_pareto, showparetos = args.showparetos, saveparetos=args.saveparetos)
     distancias.append(distancia)
     ds1.append(d1)
     ds2.append(d2)
+    hps.append(hp)
     
 
 if args.save:
