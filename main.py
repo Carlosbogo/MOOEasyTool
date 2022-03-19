@@ -81,10 +81,14 @@ GP.optimizeKernel()
 if args.showplots:
     GP.plotSamples()
 
-distancias = []
-ds1 = []
-ds2 = []
-hps = []
+row = {
+    'ns' : len(GP.X),
+    'x'  : x_rand,
+    'y'  : y_rand
+}
+metrics = GP.evaluatePareto(real_pareto, showparetos = False, saveparetos = True)
+row.update(metrics)
+df = pd.DataFrame({k: [v] for k, v in row.items()})
 
 for l in range(total_iter):
     
@@ -98,11 +102,16 @@ for l in range(total_iter):
     GP.updateGPR()                                          ## Update data on the GP regressor
     GP.optimizeKernel()                                     ## Optimize kernel hyperparameters
 
-    pareto, distancia, d1, d2, hp = GP.evaluatePareto(real_pareto, showparetos = args.showparetos, saveparetos=args.saveparetos)
-    distancias.append(distancia)
-    ds1.append(d1)
-    ds2.append(d2)
-    hps.append(hp)
+    ## Evaluate Pareto (distances and hypervolumes)
+    row = {
+        'ns' : len(GP.X),
+        'x'  : x_best,
+        'y'  : y_best
+    }
+    metrics = GP.evaluatePareto(real_pareto, showparetos = False, saveparetos = True)
+    row.update(metrics)
+
+    df = df.append(row, ignore_index = True)
     
 
 if args.save:
@@ -112,7 +121,6 @@ if args.save:
     plt.plot(idxs, ds1)
     plt.plot(idxs, ds2)
     plt.show()
-
 
     df = pd.DataFrame({'d': distancias, 'd1': ds1, 'd2':ds2})
     df.to_csv("./CSVs/"+args.savename+".csv")

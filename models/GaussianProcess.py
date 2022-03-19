@@ -8,6 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from utils.distances import directed_hausdorff, getHyperVolume
+from utils.calc_pareto import get_pareto_undominated_by
 
 from pymoo.optimize import minimize
 from pymoo.algorithms.moo.nsga2 import NSGA2
@@ -193,7 +194,7 @@ class GaussianProcess(object):
             axs[self.O].plot([x_best[0]], [acq],'or', markersize=4)
             axs[self.O].set_ylim(acq-0.2, acq+2.2)
                     
-        plt.show()    
+            plt.show()    
 
     def plotADF(self, x_best, pareto):
         mean, var = self.GPR.predict_y(np.array([x_best]))
@@ -286,40 +287,84 @@ class GaussianProcess(object):
             
         plt.show()
 
-    def evaluatePareto(self, reference = None, showparetos: bool = False, saveparetos: bool = False):
+    def evaluatePareto(self, pareto_real = None, showparetos: bool = False, saveparetos: bool = False):
 
+        ## Computation of Pareto Estimated
         problem = GPProblem(self)
         res = minimize(problem,
                 NSGA2(),
                 get_termination("n_gen", 40),
                 save_history=True,
                 verbose=False)
+        pareto_estimated = res.F
 
-        (distancia1,i1,j1) = directed_hausdorff(res.F, reference)
-        (distancia2,i2,j2) = directed_hausdorff(reference, res.F)
+        ## Computation of best known pareto
+        best_known_pareto = get_pareto_undominated_by(self.Y)
+
+        ## Computation of input space distances
+        (d_current_previous, _, _)  = directed_hausdorff(self.Y[-1], self.Y[:-1])
+        (xd_current_previous, _, _) = directed_hausdorff(self.X[-1], self.X[:-1])
+
+        ### Computation of all 6 distances
+        (d_e_r, i_e_r, j_e_r) = directed_hausdorff(pareto_estimated, pareto_real)
+        (d_r_e, i_r_e, j_r_e) = directed_hausdorff(pareto_real, pareto_estimated)
           
-        plt.arrow(res.F[i1,0], res.F[i1,1], reference[j1,0]-res.F[i1,0], reference[j1,1]-res.F[i1,1],
-            head_width  = (abs(reference[j1,0]-res.F[i1,0]) + abs(reference[j1,1]-res.F[i1,1]))/30,
-            head_length = (abs(reference[j1,0]-res.F[i1,0]) + abs(reference[j1,1]-res.F[i1,1]))/20, 
-            length_includes_head = True,
-            label="d1  "+ str(distancia1))        
-        plt.arrow(reference[i2][0], reference[i2][1], res.F[j2][0]-reference[i2][0], res.F[j2][1]-reference[i2][1],
-            head_width  = (abs(res.F[j2][0]-reference[i2][0]) + abs(res.F[j2][1]-reference[i2][1]))/30,
-            head_length = (abs(res.F[j2][0]-reference[i2][0]) + abs(res.F[j2][1]-reference[i2][1]))/20, 
-            length_includes_head = True,
-            label="d2  "+ str(distancia1))
+        (d_e_k, i_e_k, j_e_k) = directed_hausdorff(pareto_estimated, best_known_pareto)
+        (d_k_e, i_k_e, j_k_e) = directed_hausdorff(best_known_pareto, pareto_estimated)
+
+        (d_k_r, i_k_r, j_k_r) = directed_hausdorff(best_known_pareto, pareto_real)
+        (d_r_k, i_r_k, j_r_k) = directed_hausdorff(pareto_real, best_known_pareto)
+
+        ### Plot distances
+        def plotDistance(pareto1, pareto2, i, j, name, value):
+            plt.arrow(  pareto1[i,0], pareto1[i,1], 
+                        pareto2[j,0]-pareto1[i,0], pareto2[j,1]-pareto1[i,1],
+                        head_width  = (abs(pareto2[j,0]-pareto1[i,0]) + abs(pareto2[j,1]-pareto1[i,1]))/30,
+                        head_length = (abs(pareto2[j,0]-pareto1[i,0]) + abs(pareto2[j,1]-pareto1[i,1]))/20, 
+                        length_includes_head = True,
+                        label=name+"  "+ str(value))
+
+        plotDistance(pareto_estimated, pareto_real, i_e_r, j_e_r, "d_e_r", d_e_r)
+        plotDistance(pareto_real, pareto_estimated, i_r_e, j_r_e, "d_r_e", d_r_e)
+        plotDistance(pareto_estimated, best_known_pareto, i_e_k, j_e_k, "d_e_k", d_e_k)
+        plotDistance(best_known_pareto, pareto_estimated, i_k_e, j_k_e, "d_k_e", d_k_e)
+        plotDistance(best_known_pareto, pareto_real, i_k_r, j_k_r, "d_k_r", d_k_r)
+        plotDistance(pareto_real, best_known_pareto, i_r_k, j_r_k, "d_r_k", d_r_k)
         
-        F = res.F[np.argsort(res.F[:,1])]
-        plt.plot(F[:,0], F[:,1], 'b', label='Pareto front')
-        plt.plot(reference[:,0], reference[:,1], 'r', label='Pareto real')
+        ## Plot pareto real
+        plt.plot(pareto_real[:,0], pareto_real[:,1], 'r', label='Real Pareto')
+
+        ## Plot ordered pareto estimated
+        F = pareto_estimated[np.argsort(pareto_estimated[:,1])]
+        plt.plot(F[:,0], F[:,1], 'b', label='Estimated Pareto')
+
+
+        ## Plot best known pareto
+        best_known_pareto = get_pareto_undominated_by(self.Y)
+        plt.plot(best_known_pareto[:,0], best_known_pareto[:,1], 'xg', markersize=10, label="Best Known Pareto")
         plt.legend()
+
+        metrics = {
+            'd_e_r' : d_e_r,
+            'd_r_e' : d_r_e,
+            'd_e_k' : d_e_k,
+            'd_k_e' : d_k_e,
+            'd_k_r' : d_k_r,
+            'd_r_k' : d_r_k,
+            'hp_e'  : getHyperVolume(pareto_estimated[np.argsort(pareto_estimated[:,0])]),
+            'hp_r'  : getHyperVolume(pareto_real[np.argsort(pareto_real[:,0])]),
+            'hp_k'  : getHyperVolume(best_known_pareto[np.argsort(best_known_pareto[:,0])]),
+            'd_current_previous' : d_current_previous,
+            'xd_current_previous' : xd_current_previous
+        }
 
         if saveparetos:  
             plt.savefig("ImagesExp/"+str(len(self.X))+'.png')
         if showparetos:
-            print(distancia1, distancia2, getHyperVolume(res.F[np.argsort(res.F[:,0])]), getHyperVolume(reference))
+            print(metrics)
             plt.show()
         plt.clf()
+        return metrics
 
-        return res.F, distancia1 if distancia1>distancia2 else distancia2, distancia1, distancia2, abs(getHyperVolume(res.F[np.argsort(res.F[:,0])])-getHyperVolume(reference))
+
 
