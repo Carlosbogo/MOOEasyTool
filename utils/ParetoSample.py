@@ -24,7 +24,7 @@ def getParetoFrontSamples(GP: GaussianProcess, N: int = 1_000, M: int = 5):
 
     Paretos = []
     xx = sobol_seq.i4_sobol_generate(GP.d,N)
-    samples = GP.GPR.predict_f_samples(xx,M)
+    samples = GP.multiGPR.predict_f_samples(xx,M)
     maxs = tf.math.reduce_max(tf.math.reduce_max(samples, axis=0),axis=0)
     grid = np.transpose(generateLinspaceGrid(100,GP.O-1).numpy())
     for sample in samples:
@@ -42,7 +42,7 @@ def getParetoSetSamples(GP: GaussianProcess, N: int = 1_000, M: int = 5):
 
     Paretos = []
     xx = sobol_seq.i4_sobol_generate(GP.d,N)
-    samples = GP.GPR.predict_f_samples(xx,M)
+    samples = GP.multiGPR.predict_f_samples(xx,M)
     for sample in samples:
 
         pareto_front = get_pareto_undominated_by(sample)
@@ -55,7 +55,7 @@ def getParetoSamples(GP: GaussianProcess, N: int = 1_000, M: int = 5):
 
     Pareto_fronts, Pareto_sets = [], []
     xx = sobol_seq.i4_sobol_generate(GP.d,N)
-    samples = GP.GPR.predict_f_samples(xx,M)
+    samples = GP.multiGPR.predict_f_samples(xx,M)
 
     for sample in samples:
         pareto_front = get_pareto_undominated_by(sample.numpy())

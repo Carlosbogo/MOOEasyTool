@@ -16,11 +16,11 @@ from models.GaussianProcess import GaussianProcess
 class MESProblem(Problem):
     def __init__(self, GP: GaussianProcess, optimums):
         super().__init__(n_var=GP.d, n_obj=GP.O, n_constr=GP.C, xl=np.array(GP.lowerBounds), xu=np.array(GP.upperBounds))
-        self.GPR = GP.GPR
+        self.multiGPR = GP.multiGPR
         self.optimums = optimums
 
     def _evaluate(self, X, out, *args, **kwargs):
-        mean, var = self.GPR.predict_y(np.array([[X]]))
+        mean, var = self.multiGPR.predict_y(np.array([[X]]))
 
         acq = tf.zeros_like(mean)
         for optimum in self.optimums:
@@ -34,7 +34,7 @@ class MESProblem(Problem):
         grid = sobol_seq.i4_sobol_generate(self.n_var,1000)
         bound_grid = np.vectorize(lambda x : x*(self.xu[0]-self.xl[0])+self.xl[0])(grid)
         
-        mean, var = self.GPR.predict_y(bound_grid)
+        mean, var = self.multiGPR.predict_y(bound_grid)
 
         acq = tf.zeros_like(mean)
         for optimum in self.optimums:

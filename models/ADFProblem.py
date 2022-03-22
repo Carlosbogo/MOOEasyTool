@@ -14,11 +14,11 @@ from utils.ADFAlgorithm import ADF
 class ADFProblem(Problem):
     def __init__(self, GP: GaussianProcess, Paretos):
         super().__init__(n_var=GP.d, n_obj=1, n_constr=0, xl=np.array(GP.lowerBounds), xu=np.array(GP.upperBounds))
-        self.GPR = GP.GPR
+        self.multiGPR = GP.multiGPR
         self.Paretos = Paretos
 
     def _evaluate(self, x, out, *args, **kwargs):
-        mean, var = self.GPR.predict_y(np.array([[x]]))
+        mean, var = self.multiGPR.predict_y(np.array([[x]]))
 
         pareto_var = tf.zeros(var[0][0].shape, dtype=tf.dtypes.float64)
         for pareto in self.Paretos:
@@ -32,7 +32,7 @@ class ADFProblem(Problem):
     def curve(self):
         grid = sobol_seq.i4_sobol_generate(self.n_var,100)
         bound_grid = np.vectorize(lambda x : x*(self.xu[0]-self.xl[0])+self.xl[0])(grid)
-        mean, var = self.GPR.predict_y(bound_grid)
+        mean, var = self.multiGPR.predict_y(bound_grid)
 
         pareto_var = tf.zeros(var[0][0].shape, dtype=tf.dtypes.float64)
         for pareto in self.Paretos:

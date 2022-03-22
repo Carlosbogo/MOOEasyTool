@@ -16,7 +16,7 @@ An user friendly MOO tool
 | Y              | Empty 2D np array         | output data of the GP      |
 | noise_variance | 0.01                      | output noise of the GP     |
 | opt            | gpflow.optimizers.Scipy() | Optimizer of GP's kernel   |
-| GPR            | None                      | Gaussian Process Regressor |
+| multiGPR       | None                      | Gaussian Process Regressor |
 
 NOTE1: We need at least 1 sample (x,y) so that GPR is not completly flat without any further assumption.
 NOTE2: Minimum noise is 1e-6 which is practically none
@@ -26,15 +26,15 @@ NOTE2: Minimum noise is 1e-6 which is practically none
     1. Generate a random intput sample
     2. Evaluate functions and constrains to get its ourput
     3. Add the sample (input, output) to GP model 
-    4. Update GPR model
-    5. Optimize GPR's kernel hyperparameters
+    4. Update multiGPR model
+    5. Optimize multiGPR's kernel hyperparameters
 
 3. For each iteration of the iterations:
     1. Create a searching grid of the input space.
     2. Evaluate acquisition function in the grid to get the optimum.
     3. Add the sample (input, output) to GP model 
-    4. Update GPR model
-    5. Optimize GPR's kernel hyperparameters
+    4. Update multiGPR model
+    5. Optimize multiGPR's kernel hyperparameters
 
 
 ## TODO: Next task to complete

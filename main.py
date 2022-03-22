@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 from models.GaussianProcess import GaussianProcess
-from acquisition_functions.MES import mes_acq
+from acquisition_functions.MES import mes_acq, basic_mes_acq
 from acquisition_functions.PESMO import pesmo_acq
 from acquisition_functions.MESMO import mesmo_acq
 from arguments.arguments import MainArguments
@@ -76,7 +76,7 @@ for l in range(initial_iter):
     y_rand = evaluation(x_rand)
     GP.addSample(x_rand,y_rand, args.save, outputFile)
 
-GP.updateGPR()
+GP.updateGP()
 GP.optimizeKernel()
 if args.showplots:
     GP.plotSamples()
@@ -93,13 +93,13 @@ df = pd.DataFrame({k: [v] for k, v in row.items()})
 for l in range(total_iter):
     
     ## Search of the best acquisition function
-    x_best, acq_best = mes_acq(GP, showplots = args.showplots)
+    x_best, acq_best = basic_mes_acq(GP, showplots = args.showplots)
     ## EVALUATION OF THE OUTSIDE FUNCTION
     y_best = evaluation(x_best)
     
     ## UPDATE
     GP.addSample(x_best,y_best, args.save, outputFile)      ## Add new sample to the model
-    GP.updateGPR()                                          ## Update data on the GP regressor
+    GP.updateGP()                                          ## Update data on the GP regressor
     GP.optimizeKernel()                                     ## Optimize kernel hyperparameters
 
     ## Evaluate Pareto (distances and hypervolumes)
