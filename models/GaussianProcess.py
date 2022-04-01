@@ -338,8 +338,8 @@ class GaussianProcess(object):
         ## Plot best known pareto
         best_known_pareto = get_pareto_undominated_by(self.Y)
         plt.plot(best_known_pareto[:,0], best_known_pareto[:,1], 'xg', markersize=10, label="Best Known Pareto")
-        plt.legend()
-
+        plt.legend(bbox_to_anchor=(1.4, 0.4))
+        
         metrics = {
             'd_e_r' : d_e_r,
             'd_r_e' : d_r_e,
@@ -357,7 +357,6 @@ class GaussianProcess(object):
         if saveparetos:  
             plt.savefig("ImagesExp/"+str(len(self.X))+'.png')
         if showparetos:
-            print(metrics)
             plt.show()
         plt.clf()
         return metrics
@@ -368,8 +367,9 @@ class MultiGPR(object):
             gpflow.models.GPR(
                 [X, Y[:,i:i+1]],
                 kernel = kernel, 
-                noise_variance = noise_variance,
-                mean_function = gpflow.mean_functions.Constant())
+                #mean_function = gpflow.mean_functions.Constant(),
+                noise_variance = noise_variance
+            )
             for i in range(Y.shape[-1]) 
         ]
         self.opt = gpflow.optimizers.Scipy()

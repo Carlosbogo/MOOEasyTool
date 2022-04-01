@@ -1,7 +1,8 @@
 import numpy as np
 
 def directed_hausdorff(xx, yy):
-
+    if len(xx)==0 or len(yy)==0:
+        return float("Nan"), -1, -1
     zz = np.zeros((xx.shape[0], yy.shape[0]))
 
     for i_x, x in enumerate(xx):
