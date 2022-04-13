@@ -1,9 +1,3 @@
-"""
-@author: Miguel Taibo Martínez
-
-Date: 16-Nov 2021
-"""
-
 import os
 import numpy as np
 import gpflow
@@ -14,6 +8,7 @@ from models.GaussianProcess import GaussianProcess
 from acquisition_functions.MES import mes_acq, basic_mes_acq
 from acquisition_functions.PESMO import pesmo_acq
 from acquisition_functions.MESMO import mesmo_acq
+from acquisition_functions.UseMO import usemo_acq
 from arguments.arguments import MainArguments
 
 from MOObenchmark import MOOackley, MOOquadratic
@@ -46,7 +41,8 @@ def evaluation(x):
 O = 2
 C = 0
 
-N = 10_001
+N = 10001
+
 X = np.linspace(args.lower_bound,args.upper_bound,N)
 Z = np.zeros((N,2))
 
@@ -86,14 +82,14 @@ row = {
     'x'  : x_rand,
     'y'  : y_rand
 }
-metrics = GP.evaluatePareto(real_pareto, showparetos = False, saveparetos = True)
-row.update(metrics)
-df = pd.DataFrame({k: [v] for k, v in row.items()})
+# metrics = GP.evaluatePareto(real_pareto, showparetos = False, saveparetos = True)
+# row.update(metrics)
+# df = pd.DataFrame({k: [v] for k, v in row.items()})
 
 for l in range(total_iter):
     
     ## Search of the best acquisition function
-    x_best, acq_best = basic_mes_acq(GP, showplots = args.showplots)
+    x_best, acq_best = usemo_acq(GP, function = "ei", showplots = args.showplots)
     ## EVALUATION OF THE OUTSIDE FUNCTION
     y_best = evaluation(x_best)
     
@@ -103,24 +99,13 @@ for l in range(total_iter):
     GP.optimizeKernel()                                     ## Optimize kernel hyperparameters
 
     ## Evaluate Pareto (distances and hypervolumes)
-    row = {
-        'ns' : len(GP.X),
-        'x'  : x_best,
-        'y'  : y_best
-    }
-    metrics = GP.evaluatePareto(real_pareto, showparetos = False, saveparetos = True)
-    row.update(metrics)
+    # row = {
+    #     'ns' : len(GP.X),
+    #     'x'  : x_best,
+    #     'y'  : y_best
+    # }
+    # metrics = GP.evaluatePareto(real_pareto, showparetos = False, saveparetos = True)
+    # row.update(metrics)
 
-    df = df.append(row, ignore_index = True)
+    # df = df.append(row, ignore_index = True)
     
-
-if args.save:
-    idxs = [i for i,_ in enumerate(distancias)]
-
-    plt.plot(idxs, distancias)
-    plt.plot(idxs, ds1)
-    plt.plot(idxs, ds2)
-    plt.show()
-
-    df = pd.DataFrame({'d': distancias, 'd1': ds1, 'd2':ds2})
-    df.to_csv("./CSVs/"+args.savename+".csv")
