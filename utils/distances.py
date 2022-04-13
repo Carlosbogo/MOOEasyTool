@@ -26,6 +26,40 @@ def hausdorff(xx,yy):
     else:
         return (d2,x2,y2)
 
+def average_directed_haussdorf_distance(xx, yy, p=1):
+    if len(xx)==0 or len(yy)==0:
+        return float("Nan"), -1, -1
+    zz = np.zeros((xx.shape[0], yy.shape[0]))
+
+    for i_x, x in enumerate(xx):
+        for i_y, y in enumerate(yy):
+            zz[i_x, i_y]=np.linalg.norm(x-y)**p
+            
+    return np.mean(np.amin(zz, axis=1))**(1/p)
+    
+def mean_distance(xx,yy):
+    if len(xx)==0 or len(yy)==0:
+        return float("Nan")
+    zz = np.zeros((xx.shape[0], yy.shape[0]))
+
+    for i_x, x in enumerate(xx):
+        for i_y, y in enumerate(yy):
+            zz[i_x, i_y]=np.linalg.norm(x-y)
+    return np.mean(zz)
+    
+def diameter(xx):
+    if len(xx)==0:
+        return float("Nan")
+    zz = np.zeros((xx.shape[0], xx.shape[0]))
+
+    for i_x, x in enumerate(xx):
+        for i_y, y in enumerate(xx):
+            zz[i_x, i_y]=np.linalg.norm(x-y)
+    
+    return np.amax(zz)  
+    
+    
+    
 def getHyperVolume(front, reference = None):
     if reference is None:
         reference = [0,0]

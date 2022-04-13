@@ -5,7 +5,7 @@ library(ggpubr)
 
 rm(list=ls())
 
-exp = "MOOackley/"
+exp = "MOOquadratic/"
 
 files <- list.files(path = exp)
 first <- TRUE
@@ -143,13 +143,19 @@ ggarrange(p_c_hp_d, p_c_hp_d1, p_c_hp_d2, p_c_hp_ds)
 
 head(df)
 
+df_cors %>% 
+  group_by(name) %>% 
+  summarise(c_hp_d = mean(c_hp_d),
+            c_hp_d1 = mean(c_hp_d1),
+            c_hp_d2 = mean(c_hp_d2),
+            c_hp_ds = mean(c_hp_ds))
+  
+
 df %>% group_by(name, ns) %>%
   summarise(d = mean(d), d1 = mean(d1), d2 = mean(d2), ds=d1+d2, hp=mean(hp)) %>%
   group_by(name) %>%
   summarise(cor_d_hp = cor(d,hp),
             cor_d1_hp = cor(d1,hp),
             cor_d2_hp = cor(d2,hp),
-            cor_ds_hp = cor(ds,hp),
-            cor_d_d1 = cor(d,d1),
-            cor_d_d2 = cor(d,d2),
-            cor_d_ds = cor(d,ds))
+            cor_ds_hp = cor(ds,hp))
+

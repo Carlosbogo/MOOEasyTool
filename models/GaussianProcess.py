@@ -8,7 +8,7 @@ import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
-from utils.distances import directed_hausdorff, getHyperVolume
+from utils.distances import directed_hausdorff, getHyperVolume, average_directed_haussdorf_distance, diameter
 from utils.calc_pareto import get_pareto_undominated_by
 from gpflow.utilities import print_summary
 
@@ -340,7 +340,29 @@ class GaussianProcess(object):
         plt.plot(best_known_pareto[:,0], best_known_pareto[:,1], 'xg', markersize=10, label="Best Known Pareto")
         plt.legend(bbox_to_anchor=(1.4, 0.4))
         
+        ## Compute paretos diameters
+        di_r = diameter(pareto_real)
+        di_e = diameter(pareto_estimated)
+        di_k = diameter(best_known_pareto)
+        
+        ## Compute mean distances
+        dm_e_r = average_directed_haussdorf_distance(pareto_estimated, pareto_real)
+        dm_r_e = average_directed_haussdorf_distance(pareto_real, pareto_estimated)
+        dm_r_k = average_directed_haussdorf_distance(pareto_real, best_known_pareto)
+        dm_k_r = average_directed_haussdorf_distance(best_known_pareto, pareto_real)
+        dm_e_k = average_directed_haussdorf_distance(pareto_estimated, best_known_pareto)
+        dm_k_e = average_directed_haussdorf_distance(best_known_pareto, pareto_estimated)
+        
         metrics = {
+            'di_r'  : di_r,
+            'di_e'  : di_e,
+            'di_k'  : di_k,
+            'dm_e_r' : d_e_r,
+            'dm_r_e' : d_r_e,
+            'dm_e_k' : d_e_k,
+            'dm_k_e' : d_k_e,
+            'dm_k_r' : d_k_r,
+            'dm_r_k' : d_r_k,
             'd_e_r' : d_e_r,
             'd_r_e' : d_r_e,
             'd_e_k' : d_e_k,
