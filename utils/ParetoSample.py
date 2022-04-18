@@ -12,8 +12,7 @@ def generateLinspaceGrid(N: int, D: int):
         grid = [ tf.tile(g,[N]) if idx<=o else tf.repeat(g,N) for idx,g in enumerate(grid)]
 
     grid = tf.convert_to_tensor(grid)
-    print("grid shape: ", grid.shape)
-
+    
     comp = np.unique(np.array([grid[:,a] for a in range(grid.shape[1])]),axis=0).shape
     if not (comp[0]==N**D and comp[1]==D):
         raise Exception("Grid has not correct dimensions or return values")
