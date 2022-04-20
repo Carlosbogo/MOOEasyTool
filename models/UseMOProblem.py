@@ -13,21 +13,19 @@ from pymoo.core.problem import Problem
 
 from models.GaussianProcess import GaussianProcess
 
-class MESProblem(Problem):
-    def __init__(self, GP: GaussianProcess, optimums):
+class UseMOProblem(Problem):
+    def __init__(self, GP: GaussianProcess, function, optimums):
         super().__init__(n_var=GP.d, n_obj=GP.O, n_constr=GP.C, xl=np.array(GP.lowerBounds), xu=np.array(GP.upperBounds))
-        self.multiGPR = GP.multiGPR
+        self.function = function
         self.optimums = optimums
+        self.multiGPR = GP.multiGPR
 
     def _evaluate(self, X, out, *args, **kwargs):
         mean, var = self.multiGPR.predict_y(np.array([[X]]))
 
-        acq = tf.zeros_like(mean)
-        for optimum in self.optimums:
-            varphi = (optimum-mean)/tf.math.sqrt(var)
-            pdf, cdf = norm.pdf(varphi), tf.math.maximum(norm.cdf(varphi),1e-30)
-            acq += varphi*pdf / (2*cdf) - tf.math.log(cdf)
-        out["F"] = np.column_stack(tf.math.reduce_sum(acq,axis=3)[0])
+        # import pdb
+        # pdb.set_trace()
+        out["F"] = np.column_stack(self.function(mean, var, self.optimums)[0])
 
     def curve(self):
 
@@ -36,9 +34,14 @@ class MESProblem(Problem):
         
         mean, var = self.multiGPR.predict_y(bound_grid)
 
-        acq = tf.zeros_like(mean)
-        for optimum in self.optimums:
-            varphi = (optimum-mean)/tf.math.sqrt(var)
-            pdf, cdf = norm.pdf(varphi), tf.math.maximum(norm.cdf(varphi),1e-30)
-            acq += varphi*pdf / (2*cdf) - tf.math.log(cdf)
-        return bound_grid, tf.math.reduce_sum(acq,axis=1)
+        return bound_grid, self.function(mean, var, self.optimums)[0]
+
+import matplotlib.pyplot as plt
+
+def plotMV(xx, mean, var):
+    fig, axs = plt.subplots(mean.shape[-1])
+    for i in range(mean.shape[-1]):
+        axs[i].plot(xx[:,0], mean[:,i], 'xb', lw=2)
+        axs[i].plot(xx[:,0], var[:,i], 'xr', lw=2)
+
+    plt.show()

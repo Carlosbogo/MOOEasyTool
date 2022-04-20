@@ -1,19 +1,18 @@
-"""
-@author: Miguel Taibo Martínez
-
-Date: 16-Nov 2021
-"""
-
 import os
 import numpy as np
 import gpflow
+import matplotlib.pyplot as plt
+import pandas as pd
 
 from models.GaussianProcess import GaussianProcess
-from acquisition_functions.MES import mes_acq
+from acquisition_functions.MES import mes_acq, basic_mes_acq
 from acquisition_functions.PESMO import pesmo_acq
 from acquisition_functions.MESMO import mesmo_acq
+from acquisition_functions.UseMO import usemo_acq
 from arguments.arguments import MainArguments
 
+from MOObenchmark import MOOackley, MOOquadratic
+from utils.calc_pareto import get_pareto_undominated_by, getSetfromFront
 
 ### Definition of inside parameters
 Aguments = MainArguments()
@@ -36,21 +35,23 @@ upperBounds = [args.upper_bound]*d
 
 
 ### Definitions of outside parameters
-from benchmark import f1,f2,f3, GPRandomFunction
-
-# functions=[f1, f2]
-# constraints=[] 
-# def evaluation(x,d):
-#     y = [f(x,d) for f in functions]
-#     c = [f(x,d) for f in constraints]
-#     return np.array(y+c)
+def evaluation(x):
+    return MOOquadratic(x, c1=-.5, c2=.5)
 
 O = 2
 C = 0
 
-def evaluation(x,d):
-    mean, _ = GPRandomFunction(O, d, lowerBounds, upperBounds)(np.array([x]))
-    return mean[0]
+N = 10001
+
+X = np.linspace(args.lower_bound,args.upper_bound,N)
+Z = np.zeros((N,2))
+
+for i in range(N):
+    Z[i]=evaluation(X[i])
+
+real_pareto = get_pareto_undominated_by(np.reshape(Z,(-1,2)))
+real_pareto = real_pareto[np.argsort(real_pareto[:,1])]
+pareto_set = getSetfromFront(X,Z,real_pareto)
 
 ### Kernerl configuration 
 k = gpflow.kernels.SquaredExponential()
@@ -68,23 +69,43 @@ for l in range(initial_iter):
         if GP.X is None or not x_rand in GP.X:
             break
     ## EVALUATION OF THE OUTSIDE FUNCTION
-    y_rand = evaluation(x_rand,d)
+    y_rand = evaluation(x_rand)
     GP.addSample(x_rand,y_rand, args.save, outputFile)
 
-GP.updateGPR()
+GP.updateGP()
 GP.optimizeKernel()
 if args.showplots:
     GP.plotSamples()
 
+row = {
+    'ns' : len(GP.X),
+    'x'  : x_rand,
+    'y'  : y_rand
+}
+# metrics = GP.evaluatePareto(real_pareto, showparetos = False, saveparetos = True)
+# row.update(metrics)
+# df = pd.DataFrame({k: [v] for k, v in row.items()})
+
 for l in range(total_iter):
     
     ## Search of the best acquisition function
-    x_best, acq_best = mesmo_acq(GP, showplots = args.showplots)
+    x_best, acq_best = usemo_acq(GP, function = "ei", showplots = args.showplots)
     ## EVALUATION OF THE OUTSIDE FUNCTION
-    y_best = evaluation(x_best,d)
+    y_best = evaluation(x_best)
     
     ## UPDATE
     GP.addSample(x_best,y_best, args.save, outputFile)      ## Add new sample to the model
-    GP.updateGPR()                                          ## Update data on the GP regressor
+    GP.updateGP()                                          ## Update data on the GP regressor
     GP.optimizeKernel()                                     ## Optimize kernel hyperparameters
 
+    ## Evaluate Pareto (distances and hypervolumes)
+    # row = {
+    #     'ns' : len(GP.X),
+    #     'x'  : x_best,
+    #     'y'  : y_best
+    # }
+    # metrics = GP.evaluatePareto(real_pareto, showparetos = False, saveparetos = True)
+    # row.update(metrics)
+
+    # df = df.append(row, ignore_index = True)
+    

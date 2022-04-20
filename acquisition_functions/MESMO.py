@@ -49,7 +49,7 @@ def mesmo_acq(GP: GaussianProcess, N: int = 1_000, M: int = 5, showplots: bool =
     if showplots:
         x_tries, acqs = problem.curve() 
         GP.plotMES(res.X, res.F[0], x_tries, acqs)
-        for pareto in Paretos:
-            GP.plotADF(res.X, pareto)
+        # for pareto in Paretos:
+        #     GP.plotADF(res.X, pareto)
 
     return res.X, res.F[0]

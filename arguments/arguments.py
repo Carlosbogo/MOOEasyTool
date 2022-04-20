@@ -120,7 +120,20 @@ class MainArguments(OutpuArguments):
         self.parser.add_argument(
             "--showplots",
             action='store_true',
-            help='Save resulst in file')
+            help='Show different plots for each acq function')
+        self.parser.add_argument(
+            "--showparetos",
+            action='store_true',
+            help='Show pareto evaluation results')
+        self.parser.add_argument(
+            "--saveparetos",
+            action='store_true',
+            help='Save pareto evaluation results')
+        self.parser.add_argument(
+            "--savename",
+            type=str,
+            default="exp",
+            help="Name to save experiment name")
     def _correct(self):
         ## Output arguments
         assert isinstance(self.args.dir_path, str)
@@ -135,4 +148,7 @@ class MainArguments(OutpuArguments):
         assert isinstance(self.args.lower_bound, int)
         assert isinstance(self.args.upper_bound, int)
         assert isinstance(self.args.showplots, bool)
+        assert isinstance(self.args.showparetos, bool)
+        assert isinstance(self.args.saveparetos, bool)
+        assert isinstance(self.args.savename, str)
         

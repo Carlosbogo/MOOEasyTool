@@ -50,7 +50,7 @@ basic_mes_acq_hp = {
 def mes_acq(GP: GaussianProcess, N: int = 1_000, M: int = 50, showplots: bool = False):
     
     xx = sobol_seq.i4_sobol_generate(GP.d,N)
-    samples = GP.GPR.predict_f_samples(xx,M)
+    samples = GP.multiGPR.predict_f_samples(xx,M)
     optimums = tf.math.reduce_min(samples, axis = 1)
 
     problem = MESProblem(GP, optimums)
@@ -70,7 +70,7 @@ def mes_acq(GP: GaussianProcess, N: int = 1_000, M: int = 50, showplots: bool = 
 
 def basic_mes_acq(GP: GaussianProcess, N: int = 1_000, M: int = 50,showplots: bool = False):
     xx = sobol_seq.i4_sobol_generate(GP.d,N)
-    samples = GP.GPR.predict_y(xx)
+    samples = GP.multiGPR.predict_y(xx)
     optimums = tf.math.reduce_min(samples, axis = 1)
 
     problem = MESProblem(GP, optimums)
