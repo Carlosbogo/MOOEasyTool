@@ -24,13 +24,12 @@ from utils.EPAlgorithm import EP
 from models.GPProblem import GPProblem
 
 class GaussianProcess(object):
-    def __init__(self, O:int, C:int, d:int, lowerBounds: float, upperBounds: float, kernel, X = None, Y = None, noise_variance=0.01):
+    def __init__(self, O:int, C:int, d:int, lowerBounds: float, upperBounds: float, X = None, Y = None, noise_variance=0.01):
         self.O = O
         self.C = C
         self.d = d
         self.lowerBounds = lowerBounds
         self.upperBounds = upperBounds
-        self.kernel = kernel
         self.X = X
         self.Y = Y
         self.noise_variance = noise_variance
@@ -47,7 +46,7 @@ class GaussianProcess(object):
             self.writeSample(filename, x,y)
 
     def updateGP(self):
-        self.multiGPR = MultiGPR(X = self.X, Y = self.Y, kernel = self.kernel, noise_variance = self.noise_variance)
+        self.multiGPR = MultiGPR(X = self.X, Y = self.Y, noise_variance = self.noise_variance)
 
     def optimizeKernel(self):
         self.multiGPR.optimizeKernel()
@@ -384,12 +383,12 @@ class GaussianProcess(object):
         return metrics
 
 class MultiGPR(object):
-    def __init__(self, X = None, Y = None, kernel = None, noise_variance=0.01):
+    def __init__(self, X = None, Y = None, noise_variance=0.01):
         self.GPRs = [
             gpflow.models.GPR(
                 [X, Y[:,i:i+1]],
-                kernel = kernel, 
-                #mean_function = gpflow.mean_functions.Constant(),
+                kernel = gpflow.kernels.SquaredExponential(), 
+                mean_function = gpflow.mean_functions.Constant(),
                 noise_variance = noise_variance
             )
             for i in range(Y.shape[-1]) 
