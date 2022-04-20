@@ -53,10 +53,8 @@ real_pareto = get_pareto_undominated_by(np.reshape(Z,(-1,2)))
 real_pareto = real_pareto[np.argsort(real_pareto[:,1])]
 pareto_set = getSetfromFront(X,Z,real_pareto)
 
-### Kernerl configuration 
-k = gpflow.kernels.SquaredExponential()
 ### GPs Initialization
-GP = GaussianProcess(O, C, d, lowerBounds, upperBounds, k, noise_variance=2e-6)
+GP = GaussianProcess(O, C, d, lowerBounds, upperBounds, noise_variance=2e-6)
 
 if args.save:
     GP.writeGPHeader(outputFile)
