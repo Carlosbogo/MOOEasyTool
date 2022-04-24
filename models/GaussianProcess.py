@@ -382,6 +382,27 @@ class GaussianProcess(object):
         plt.clf()
         return metrics
 
+    def evaluateNoRealPareto(self):
+        ## Computation of Pareto Estimated
+        problem = GPProblem(self)
+        res = minimize(problem,
+                NSGA2(),
+                get_termination("n_gen", 40),
+                save_history=True,
+                verbose=False)
+        pareto_estimated = res.F
+
+        ## Computation of best known pareto
+        best_known_pareto = get_pareto_undominated_by(self.Y)
+
+        (d_e_k, _, _) = directed_hausdorff(pareto_estimated, best_known_pareto)
+        (d_k_e, _, _) = directed_hausdorff(best_known_pareto, pareto_estimated)
+
+        dm_e_k = average_directed_haussdorf_distance(pareto_estimated, best_known_pareto)
+        dm_k_e = average_directed_haussdorf_distance(best_known_pareto, pareto_estimated)
+
+        return d_e_k+d_k_e, dm_e_k+dm_k_e
+
 class MultiGPR(object):
     def __init__(self, X = None, Y = None, noise_variance=0.01):
         self.GPRs = [
