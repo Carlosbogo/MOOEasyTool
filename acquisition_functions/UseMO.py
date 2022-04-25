@@ -17,7 +17,7 @@ from models.UseMOProblem import UseMOProblem
 from models.GaussianProcess import GaussianProcess
 
 usemo_acq_hp = {
-    'id' : 3,
+    'id' : 4,
     'name' : "UseMO",
     'help' : "This function develops UseMo procedure described by Syrine Belakaria(2020).",
     'hps' : [
