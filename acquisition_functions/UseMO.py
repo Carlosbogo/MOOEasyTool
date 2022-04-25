@@ -23,9 +23,9 @@ usemo_acq_hp = {
     'hps' : [
         {
             'name' : 'function',
-            'type': "%s",
+            'type': "%o",
             'help': "Function to use in the first stage",
-            'default': "ei"
+            'options': ["ei", "pi", "ucb"] 
         },
         {
             'name' : 'N',
