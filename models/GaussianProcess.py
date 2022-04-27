@@ -382,7 +382,7 @@ class GaussianProcess(object):
         plt.clf()
         return metrics
 
-    def evaluateNoRealPareto(self):
+    def evaluateNoRealPareto(self, showparetos: bool = False, saveparetos: bool = False):
         ## Computation of Pareto Estimated
         problem = GPProblem(self)
         res = minimize(problem,
@@ -401,6 +401,20 @@ class GaussianProcess(object):
         dm_e_k = average_directed_haussdorf_distance(pareto_estimated, best_known_pareto)
         dm_k_e = average_directed_haussdorf_distance(best_known_pareto, pareto_estimated)
 
+        ## Plot ordered pareto estimated
+        F = pareto_estimated[np.argsort(pareto_estimated[:,1])]
+        plt.plot(F[:,0], F[:,1], 'b', label='Estimated Pareto')
+
+
+        ## Plot best known pareto
+        best_known_pareto = get_pareto_undominated_by(self.Y)
+        plt.plot(best_known_pareto[:,0], best_known_pareto[:,1], 'xg', markersize=10, label="Best Known Pareto")
+        plt.legend(bbox_to_anchor=(1.4, 0.4))
+        if showparetos:
+            plt.show()
+        if saveparetos:  
+            plt.savefig("ImagesExp/"+str(len(self.X))+'.png')
+        plt.clf()
         return d_e_k+d_k_e, dm_e_k+dm_k_e
 
 class MultiGPR(object):
