@@ -1,4 +1,7 @@
 experiments
+.ipynb_checkpoints/
+SingleObjectiveExperiments/
+untitled*
 
 *.pyc
 

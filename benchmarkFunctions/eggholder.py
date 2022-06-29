@@ -3,7 +3,7 @@ import numpy as np
 def eggholder(xx):
 
   if len(xx)!=2:
-    ValueError('Bukin6 function must have dimension 2, dimension',len(xx),'was found.')
+    ValueError('Eggholder function must have dimension 2, dimension',len(xx),'was found.')
 
   x1 = xx[0]
   x2 = xx[1]
