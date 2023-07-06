@@ -21,13 +21,13 @@ class MESProblem(Problem):
 
     def _evaluate(self, X, out, *args, **kwargs):
         mean, var = self.multiGPR.predict_y(np.array([[X]]))
-
         acq = tf.zeros_like(mean)
         for optimum in self.optimums:
             varphi = (optimum-mean)/tf.math.sqrt(var)
             pdf, cdf = norm.pdf(varphi), tf.math.maximum(norm.cdf(varphi),1e-30)
             acq += varphi*pdf / (2*cdf) - tf.math.log(cdf)
         out["F"] = np.column_stack(tf.math.reduce_sum(acq,axis=3)[0])
+
 
     def curve(self):
 

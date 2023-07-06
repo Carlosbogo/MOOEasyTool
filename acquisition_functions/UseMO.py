@@ -16,8 +16,6 @@ import sobol_seq
 from models.UseMOProblem import UseMOProblem
 from models.GaussianProcess import GaussianProcess
 
-from acquisition_functions.SingleObjective import pi, ei, ucb, mes, simulated_mes
-
 usemo_acq_hp = {
     'id' : 4,
     'name' : "UseMO",
@@ -37,6 +35,27 @@ usemo_acq_hp = {
         }
     ]
 }
+
+
+def pi(mean, var, optimum, e = 0):
+    z = (optimum+e-mean)/np.sqrt(var)
+    return 1 - norm.cdf(z)
+
+def ei(mean, var, optimum, e = 0):
+    z = (optimum+e-mean)/np.sqrt(var)
+    return (mean- optimum-e)*(1-norm.cdf(z))+np.sqrt(var)*norm.pdf(z)
+
+def ucb(mean, var, optimum, beta = 0.1, e=0):
+    return mean + beta*var
+
+def mes(mean, var, optimums, e = 0):
+    acq = 0
+    for optimum in optimums:
+        z = (optimum+e-mean)/np.sqrt(var)
+        cdf = norm.cdf(z)
+        pdf = norm.pdf(z)
+        acq += -np.log(cdf)+z*pdf/2/cdf
+    return acq/len(optimums)
 
 def codeToFunction(code):
     if code=="pi":

@@ -36,7 +36,6 @@ mesmo_acq_hp = {
 def mesmo_acq(GP: GaussianProcess, N: int = 1_000, M: int = 5, showplots: bool = False):
 
     Paretos = getParetoFrontSamples(GP, N, M)
-
     problem = ADFProblem(GP, np.array(Paretos))
     algorithm = NSGA2()
     termination = get_termination("n_gen", 10)
@@ -51,5 +50,4 @@ def mesmo_acq(GP: GaussianProcess, N: int = 1_000, M: int = 5, showplots: bool =
         GP.plotMES(res.X, res.F[0], x_tries, acqs)
         # for pareto in Paretos:
         #     GP.plotADF(res.X, pareto)
-
-    return res.X, res.F[0]
+    return res.X if len(res.X.shape)<2 else res.X[0], res.F[0]
