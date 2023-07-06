@@ -18,15 +18,15 @@ class UseMOProblem(Problem):
         super().__init__(n_var=GP.d, n_obj=GP.O, n_constr=GP.C, xl=np.array(GP.lowerBounds), xu=np.array(GP.upperBounds))
         self.function = function
         self.optimums = optimums
+        self.GP = GP
         self.multiGPR = GP.multiGPR
 
     def _evaluate(self, X, out, *args, **kwargs):
         mean, var = self.multiGPR.predict_y(np.array([[X]]))
-
         # import pdb
         # pdb.set_trace()
         out["F"] = np.column_stack(self.function(mean, var, self.optimums)[0])
-
+        
     def curve(self):
 
         grid = sobol_seq.i4_sobol_generate(self.n_var,1000)

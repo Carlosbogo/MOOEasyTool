@@ -30,8 +30,8 @@ class GaussianProcess(object):
         self.d = d
         self.lowerBounds = lowerBounds
         self.upperBounds = upperBounds
-        self.X = X
-        self.Y = Y
+        self.X = np.array(X, dtype=float)
+        self.Y = np.array(Y, dtype=float)
         self.noise_variance = noise_variance
         self.multiGPR : MultiGPR = None
 
@@ -40,13 +40,15 @@ class GaussianProcess(object):
             self.X = np.array([x])
             self.Y = np.array([y])
             return
+        print("Current x = ", self.X)
+        print("New x = ", x)
         self.X = np.append(self.X, [x], axis=0)
         self.Y = np.append(self.Y, [y], axis=0)
         if save and filename is not None:
             self.writeSample(filename, x,y)
 
     def updateGP(self):
-        self.multiGPR = MultiGPR(X = self.X, Y = self.Y, noise_variance = self.noise_variance)
+        self.multiGPR = MultiGPR(X = np.array(self.X, dtype=float), Y = self.Y, noise_variance = self.noise_variance)
 
     def optimizeKernel(self):
         self.multiGPR.optimizeKernel()

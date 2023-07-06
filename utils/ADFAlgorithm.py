@@ -9,7 +9,9 @@ import tensorflow as tf
 def ADF(mean, var, pareto):
     for y in pareto:
         z = (y-mean)/tf.math.sqrt(var)
+        print("Z = ", Z)
         Z = tf.reshape(1-tf.math.reduce_prod(norm.cdf(z),axis=1), (z.shape[0],1))
+        Z = tf.where(Z<10**-6, 10**-6, Z)
 
         Z_m = -(Z-1)/Z*norm.pdf(z)/norm.cdf(z)/tf.math.sqrt(var)
         Z_v = -(Z-1)/Z*norm.pdf(z)/norm.cdf(z)*z/2/var

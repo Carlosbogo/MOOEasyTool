@@ -10,12 +10,14 @@ from pymoo.factory import get_termination, get_sampling
 from pymoo.optimize import minimize
 from pymoo.core.problem import Problem
 
-def SingleObjectiveAcqGrid(function, GP, N = 12):
+from models.GaussianProcess import GaussianProcess
+
+def SingleObjectiveAcqGrid(function, GP: GaussianProcess, N = 12):
     xx = sobol_seq.i4_sobol_generate(GP.d,2**N)*(GP.upperBound-GP.lowerBound)+GP.lowerBound
     zz = function(GP, xx)
     return xx[np.argmax(zz)], np.amax(zz)
     
-def SingleObjectiveAcq(function, GP):
+def SingleObjectiveAcq(function, GP: GaussianProcess):
     problem = SingleObjectiveProblem(function, GP)
     algorithm = NSGA2()
     res = minimize(problem,
@@ -26,7 +28,7 @@ def SingleObjectiveAcq(function, GP):
     return res.X[0], res.F[0]
     
 class SingleObjectiveProblem(Problem):    
-    def __init__(self,function, GP):
+    def __init__(self,function, GP: GaussianProcess):
         super().__init__(n_var=GP.d, n_obj=1, n_constr=0, xl=np.array([GP.lowerBound]*GP.d), xu=np.array([GP.upperBound]*GP.d))
         self.function = function
         self.GP = GP
@@ -37,7 +39,7 @@ class SingleObjectiveProblem(Problem):
 def random(GP, X):
     return np.random.choice(X)
         
-def pi(GP, X, e = 0):
+def pi(GP: GaussianProcess, X, e = 0):
     """
         Probability of improvement: 
             * Assumes Minimization
@@ -55,7 +57,7 @@ def pi(GP, X, e = 0):
     z = -(optimum - e - mean)/tf.math.sqrt(var)
     return 1-norm.cdf(z)
 
-def ei(GP, X, e = 0):
+def ei(GP: GaussianProcess, X, e = 0):
 
     """
         Expected improvement: 
@@ -68,13 +70,13 @@ def ei(GP, X, e = 0):
         Returns:
             ei : Numpy array of shape (-1,1) with acquisition value for candidates
     """
-    mean, var = GP.GPR.predict_y(X)
+    mean, var = GP.multiGPR.predict_y(X)
     optimum = tf.math.reduce_min(GP.Y, axis = 0)
     
     z = -(optimum - e - mean)/tf.math.sqrt(var)
     return (optimum - e -mean)*(1-norm.cdf(z))+tf.math.sqrt(var)*norm.pdf(z)
 
-def ucb(GP, X, beta = 0.1, e = 0):
+def ucb(GP: GaussianProcess, X, beta = 0.1, e = 0):
     """
         Upper Confidence Bound: 
             * Assumes Minimization
@@ -90,7 +92,7 @@ def ucb(GP, X, beta = 0.1, e = 0):
     mean, var = GP.GPR.predict_y(X)
     return -(mean - beta*var)
 
-def mes(GP, X, e = 0, N = 12, M = 10):
+def mes(GP: GaussianProcess, X, e = 0, N = 12, M = 10):
     """
         Max-Value Entropy Search: 
             * Assumes Minimization
@@ -118,7 +120,7 @@ def mes(GP, X, e = 0, N = 12, M = 10):
         
     return acq/len(optimums)
 
-def simulated_mes_bins(GP, e = 0, N = 12, M = 5):
+def simulated_mes_bins(GP: GaussianProcess, e = 0, N = 12, M = 5):
     """
         Max-value Entropy Search Simulated: 
             * Assumes Minimization
@@ -132,8 +134,8 @@ def simulated_mes_bins(GP, e = 0, N = 12, M = 5):
         Returns:
             simulated_mes  : Numpy array of shape (-1,1) with acquisition value for candidates
     """
-    xx = sobol_seq.i4_sobol_generate(GP.d,2**N)*(GP.upperBound-GP.lowerBound)+GP.lowerBound
-    samples = GP.GPR.predict_f_samples(xx,M**2)
+    xx = sobol_seq.i4_sobol_generate(GP.d,2**N)*(GP.upperBounds[0]-GP.lowerBounds[0])+GP.lowerBounds[0]
+    samples = GP.multiGPR.predict_f_samples(xx,M**2)
     optimums = tf.math.reduce_min(samples, axis = 1)
     
     optimums_distances = np.array(
@@ -159,7 +161,7 @@ def simulated_mes_bins(GP, e = 0, N = 12, M = 5):
             optimum_i = i
     return np.array(xx[optimum_i]), max_acq
 
-def simulated_mes_correlation(GP, e = 0, N = 12, M = 5):
+def simulated_mes_correlation(GP: GaussianProcess, e = 0, N = 12, M = 5):
     """
         Max-value Entropy Search Simulated: 
             * Assumes Minimization
@@ -184,7 +186,7 @@ def simulated_mes_correlation(GP, e = 0, N = 12, M = 5):
     
     return np.array(xx[tf.argmax(cors)]),  tf.reduce_max(cors)
    
-def simulated_mes_spearmanr_correlation(GP, e = 0, N = 12, M = 5):
+def simulated_mes_spearmanr_correlation(GP: GaussianProcess, e = 0, N = 12, M = 5):
     """
         Max-value Entropy Search Simulated: 
             * Assumes Minimization
@@ -208,7 +210,7 @@ def simulated_mes_spearmanr_correlation(GP, e = 0, N = 12, M = 5):
     cors = tf.map_fn(fn, tf.transpose(samples, [1, 0]))
     return np.array(xx[tf.argmax(cors)]),  tf.reduce_max(cors)
     
-def simulated_mes_mic_e(GP, e = 0, N = 12, M = 5):
+def simulated_mes_mic_e(GP: GaussianProcess, e = 0, N = 12, M = 5):
     """
         Max-value Entropy Search Simulated: 
             * Assumes Minimization
